@@ -2,16 +2,18 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, MapPin, Palette, Gauge, Zap } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Settings, MapPin, Palette, Gauge, Zap, TestTube } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useDemoMode } from "@/contexts/DemoContext";
+import { toast } from "sonner";
 
 const SettingsPage = () => {
-  const [showConfidence, setShowConfidence] = useState(true);
-  const [showContamination, setShowContamination] = useState(true);
-  const [showCO2, setShowCO2] = useState(true);
-  const [haptics, setHaptics] = useState(true);
-  const [selectedCity, setSelectedCity] = useState("san-francisco");
-  const [theme, setTheme] = useState("auto");
+  const { settings, updateSetting, triggerHaptic } = useSettings();
+  const { theme, setTheme } = useTheme();
+  const { isDemoMode, enterDemoMode } = useDemoMode();
 
   return (
     <div className="min-h-screen gradient-hero pb-24 pt-6">
@@ -39,8 +41,12 @@ const SettingsPage = () => {
                 </Label>
                 <Switch 
                   id="confidence"
-                  checked={showConfidence}
-                  onCheckedChange={setShowConfidence}
+                  checked={settings.showConfidence}
+                  onCheckedChange={(val) => {
+                    updateSetting("showConfidence", val);
+                    triggerHaptic("light");
+                    toast.success(val ? "Confidence scores enabled" : "Confidence scores disabled");
+                  }}
                 />
               </div>
 
@@ -51,8 +57,12 @@ const SettingsPage = () => {
                 </Label>
                 <Switch 
                   id="contamination"
-                  checked={showContamination}
-                  onCheckedChange={setShowContamination}
+                  checked={settings.showContamination}
+                  onCheckedChange={(val) => {
+                    updateSetting("showContamination", val);
+                    triggerHaptic("light");
+                    toast.success(val ? "Contamination warnings enabled" : "Contamination warnings disabled");
+                  }}
                 />
               </div>
 
@@ -63,8 +73,12 @@ const SettingsPage = () => {
                 </Label>
                 <Switch 
                   id="co2"
-                  checked={showCO2}
-                  onCheckedChange={setShowCO2}
+                  checked={settings.showCO2}
+                  onCheckedChange={(val) => {
+                    updateSetting("showCO2", val);
+                    triggerHaptic("light");
+                    toast.success(val ? "CO₂ estimates enabled" : "CO₂ estimates disabled");
+                  }}
                 />
               </div>
 
@@ -75,8 +89,16 @@ const SettingsPage = () => {
                 </Label>
                 <Switch 
                   id="haptics"
-                  checked={haptics}
-                  onCheckedChange={setHaptics}
+                  checked={settings.haptics}
+                  onCheckedChange={(val) => {
+                    updateSetting("haptics", val);
+                    if (val && "vibrate" in navigator) {
+                      navigator.vibrate([10, 50, 10]);
+                      toast.success("Haptics enabled");
+                    } else {
+                      toast.success("Haptics disabled");
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -91,7 +113,14 @@ const SettingsPage = () => {
             
             <div className="space-y-2">
               <Label htmlFor="city">Your City</Label>
-              <Select value={selectedCity} onValueChange={setSelectedCity}>
+              <Select 
+                value={settings.selectedCity} 
+                onValueChange={(val) => {
+                  updateSetting("selectedCity", val);
+                  triggerHaptic("light");
+                  toast.success("City updated");
+                }}
+              >
                 <SelectTrigger id="city">
                   <SelectValue />
                 </SelectTrigger>
@@ -119,7 +148,14 @@ const SettingsPage = () => {
             
             <div className="space-y-2">
               <Label htmlFor="theme">Theme</Label>
-              <Select value={theme} onValueChange={setTheme}>
+              <Select 
+                value={theme} 
+                onValueChange={(val) => {
+                  setTheme(val as "light" | "dark" | "auto");
+                  triggerHaptic("light");
+                  toast.success(`Theme set to ${val}`);
+                }}
+              >
                 <SelectTrigger id="theme">
                   <SelectValue />
                 </SelectTrigger>
@@ -130,6 +166,62 @@ const SettingsPage = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="color">App Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="color"
+                  type="color"
+                  value={settings.customColor}
+                  onChange={(e) => {
+                    updateSetting("customColor", e.target.value);
+                    triggerHaptic("medium");
+                  }}
+                  className="h-12 w-20 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={settings.customColor}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^#[0-9A-F]{6}$/i.test(val)) {
+                      updateSetting("customColor", val);
+                    }
+                  }}
+                  placeholder="#2fb89d"
+                  className="flex-1 h-12 font-mono"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Customize the app's primary color
+              </p>
+            </div>
+          </Card>
+
+          {/* Demo Mode */}
+          <Card className="p-6 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
+              <TestTube className="h-4 w-4 text-accent" />
+              <h2 className="font-semibold">Demo Mode</h2>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mb-4">
+              Explore the app with sample scan data
+            </p>
+            
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                enterDemoMode();
+                triggerHaptic("medium");
+                toast.success("Demo mode activated");
+              }}
+              disabled={isDemoMode}
+            >
+              {isDemoMode ? "Demo Mode Active" : "Open Demo"}
+            </Button>
           </Card>
 
           {/* API Info */}
