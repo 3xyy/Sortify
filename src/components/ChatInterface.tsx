@@ -155,7 +155,7 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
           </ScrollArea>
 
           {/* Suggested Questions - Always visible */}
-          <div className="px-4 py-3 pb-32 border-t">
+          <div className="px-4 py-3 pb-40 border-t">
             <p className="text-xs text-muted-foreground mb-2">Tap a question to ask:</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {suggestedQuestions.map((question, index) => (
