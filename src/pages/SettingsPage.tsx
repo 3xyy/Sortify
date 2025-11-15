@@ -325,7 +325,7 @@ const SettingsPage = () => {
                 href="https://www.linkedin.com/in/yuvrajdar/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
+                className="text-primary underline font-medium"
               >
                 Yuvraj Dar
               </a>
