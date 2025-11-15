@@ -1,1 +1,4 @@
 project_id = "pfiqomcrxhdemonauxat"
+
+[functions.analyze-waste]
+verify_jwt = false

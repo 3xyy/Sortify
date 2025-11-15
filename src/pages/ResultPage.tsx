@@ -2,10 +2,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft } from "lucide-react";
+import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatInterface } from "@/components/ChatInterface";
+import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/hooks/useSettings";
+import { toast } from "sonner";
 
 const categoryConfig = {
   recycle: {
@@ -45,6 +48,7 @@ const mockResult = {
   itemName: "Plastic Water Bottle",
   category: "recycle" as const,
   confidence: 95,
+  materialType: "#1 PET plastic",
   contamination: "Clean - ready to recycle",
   instructions: [
     "Remove cap and label if possible",
@@ -62,19 +66,127 @@ const ResultPage = () => {
   const { id } = useParams();
   const { state } = useLocation();
   const [showChat, setShowChat] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { settings } = useSettings();
   
-  // Use state data if available, otherwise fall back to mock data
-  const item = state?.item;
-  const result = item ? {
-    itemName: item.itemName,
-    category: item.category,
-    confidence: item.confidence,
-    contamination: item.details.contamination,
-    instructions: item.details.instructions,
-    localRule: item.details.localRule,
-    co2Saved: item.details.co2Saved,
-    imageUrl: item.thumbnail,
-  } : mockResult;
+  useEffect(() => {
+    const analyzeImage = async () => {
+      // Check if we have item data from history
+      if (state?.item) {
+        setResult({
+          itemName: state.item.itemName,
+          category: state.item.category,
+          confidence: state.item.confidence,
+          contamination: state.item.details.contamination,
+          instructions: state.item.details.instructions,
+          localRule: state.item.details.localRule,
+          co2Saved: state.item.details.co2Saved,
+          imageUrl: state.item.thumbnail,
+          materialType: state.item.details.materialType || "Unknown"
+        });
+        return;
+      }
+
+      // Check if we have a file to analyze
+      const file = state?.file;
+      if (!file) {
+        toast.error("No image provided");
+        navigate("/");
+        return;
+      }
+
+      setIsAnalyzing(true);
+      
+      try {
+        // Convert file to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = reader.result as string;
+            // Extract just the base64 part (remove data:image/...;base64, prefix)
+            const base64Data = base64.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+        });
+        
+        reader.readAsDataURL(file);
+        const imageData = await base64Promise;
+
+        // Get city name from settings
+        const cityMap: Record<string, string> = {
+          "san-francisco": "San Francisco",
+          "new-york": "New York",
+          "los-angeles": "Los Angeles",
+          "chicago": "Chicago",
+          "seattle": "Seattle"
+        };
+        const city = cityMap[settings.selectedCity] || settings.selectedCity;
+
+        console.log('Calling analyze-waste function...');
+        
+        // Call the edge function
+        const { data, error } = await supabase.functions.invoke('analyze-waste', {
+          body: { 
+            imageData,
+            city
+          }
+        });
+
+        if (error) {
+          console.error('Error analyzing image:', error);
+          throw error;
+        }
+
+        console.log('Analysis result:', data);
+
+        // Create object URL for the image
+        const imageUrl = URL.createObjectURL(file);
+        
+        // Set the result with the image URL
+        setResult({
+          ...data,
+          imageUrl
+        });
+
+      } catch (error) {
+        console.error('Failed to analyze image:', error);
+        toast.error("Failed to analyze image. Please try again.");
+        // Use mock data as fallback
+        setResult(mockResult);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+
+    analyzeImage();
+  }, [state, navigate, settings.selectedCity]);
+  
+  // Show loading state while analyzing
+  if (isAnalyzing) {
+    return (
+      <div className="min-h-screen gradient-hero flex items-center justify-center" data-page-container>
+        <div className="text-center space-y-4 px-6">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <h2 className="text-2xl font-bold">Analyzing Your Item</h2>
+          <p className="text-muted-foreground">Our AI is identifying the best way to dispose of this item...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!result) {
+    return (
+      <div className="min-h-screen gradient-hero flex items-center justify-center" data-page-container>
+        <div className="text-center space-y-4 px-6">
+          <h2 className="text-2xl font-bold">No Image Found</h2>
+          <p className="text-muted-foreground">Please scan an item first</p>
+          <Button onClick={() => navigate("/")}>Go Home</Button>
+        </div>
+      </div>
+    );
+  }
   
   const config = categoryConfig[result.category];
   const Icon = config.icon;
