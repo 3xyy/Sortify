@@ -1,0 +1,42 @@
+import { Home, History, Settings } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { icon: Home, label: "Home", path: "/" },
+  { icon: History, label: "History", path: "/history" },
+  { icon: Settings, label: "Settings", path: "/settings" },
+];
+
+export const BottomNav = () => {
+  const location = useLocation();
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe">
+      <div className="max-w-md mx-auto px-4 py-2">
+        <div className="flex items-center justify-around">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-smooth min-w-[70px]",
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-medium" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                )}
+              >
+                <Icon className={cn("h-5 w-5", isActive && "animate-scale-in")} />
+                <span className="text-xs font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+};
