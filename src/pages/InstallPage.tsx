@@ -124,6 +124,14 @@ const InstallPage = () => {
             </div>
           </Card>
         )}
+
+        <Button 
+          variant="ghost" 
+          className="w-full mt-4"
+          onClick={() => navigate('/')}
+        >
+          Already installed?
+        </Button>
       </div>
     </div>
   );
