@@ -52,6 +52,8 @@ All colors MUST be HSL.
     --recycle-foreground: 0 0% 100%;
     --compost: 120 60% 45%;
     --compost-foreground: 0 0% 100%;
+    --garbage: 0 0% 60%;
+    --garbage-foreground: 0 0% 10%;
     
     /* Lime highlight */
     --lime: 85 65% 60%;
@@ -120,6 +122,8 @@ All colors MUST be HSL.
     --recycle-foreground: 0 0% 100%;
     --compost: 120 60% 50%;
     --compost-foreground: 0 0% 100%;
+    --garbage: 0 0% 55%;
+    --garbage-foreground: 0 0% 98%;
     
     --lime: 85 65% 65%;
     --lime-foreground: 160 60% 12%;

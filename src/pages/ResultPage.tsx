@@ -32,6 +32,12 @@ const categoryConfig = {
     color: "bg-hazard text-hazard-foreground",
     description: "Requires special disposal",
   },
+  garbage: {
+    icon: Trash2,
+    label: "Landfill",
+    color: "bg-garbage text-garbage-foreground",
+    description: "Goes to landfill",
+  },
 };
 
 // Mock result data

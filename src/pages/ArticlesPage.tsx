@@ -12,7 +12,7 @@ interface Article {
   id: string;
   title: string;
   description: string;
-  category: "hazardous" | "recycling" | "composting" | "general";
+  category: "hazardous" | "recycling" | "composting" | "general" | "garbage";
   icon: typeof AlertTriangle;
   content: string;
   keywords: string[];
@@ -240,6 +240,71 @@ Before Disposal:
 • Delete personal information`,
     keywords: ["electronics", "e-waste", "computers", "phones", "batteries"],
   },
+  {
+    id: "garbage-diapers",
+    title: "Disposing of Diapers & Personal Hygiene Items",
+    description: "Proper disposal methods for diapers and hygiene products",
+    category: "garbage",
+    icon: Trash2,
+    content: `Most diapers and hygiene products belong in the landfill.
+
+Items That Go to Landfill:
+• Disposable diapers (baby and adult)
+• Feminine hygiene products
+• Cotton swabs and cotton balls
+• Tissues and paper towels
+• Makeup wipes and cleaning wipes
+
+Proper Disposal:
+• Wrap items in a small bag before disposal
+• Place in your regular trash bin
+• Never flush these items down the toilet
+• Keep bags sealed to prevent odors
+
+Environmental Considerations:
+• Consider cloth alternatives where possible
+• Look for biodegradable options
+• Minimize use when practical
+• Some communities offer composting programs for certain products
+
+Note: Always check local regulations as disposal rules may vary by location.`,
+    keywords: ["diapers", "hygiene", "landfill", "trash", "garbage", "waste"],
+  },
+  {
+    id: "garbage-chip-bags",
+    title: "Multi-Layer Packaging & Chip Bags",
+    description: "Why some flexible packaging can't be recycled",
+    category: "garbage",
+    icon: Trash2,
+    content: `Many flexible packages are made from multiple materials laminated together, making them impossible to recycle in standard facilities.
+
+Common Non-Recyclable Items:
+• Chip bags and snack pouches
+• Candy wrappers
+• Juice pouches and drink packets
+• Frozen food bags
+• Pet food bags
+• Coffee bags with metallic lining
+
+Why They Can't Be Recycled:
+• Multiple materials (plastic, aluminum, paper) bonded together
+• Cannot be separated by recycling facilities
+• Contaminate recycling streams if included
+• Too small or lightweight for sorting equipment
+
+Proper Disposal:
+• Place in regular trash bin
+• Do not put in recycling
+• Consider participating in specialized programs (TerraCycle)
+• Look for store drop-off programs for specific brands
+
+Better Choices:
+• Buy products in recyclable packaging when possible
+• Choose larger sizes to reduce packaging waste
+• Support brands using mono-material packaging
+• Bring your own reusable containers to bulk stores`,
+    keywords: ["chip bags", "packaging", "wrappers", "landfill", "trash", "garbage", "plastic"],
+  },
 ];
 
 const categoryConfig = {
@@ -247,6 +312,7 @@ const categoryConfig = {
   recycling: { label: "Recycling", color: "text-recycle" },
   composting: { label: "Composting", color: "text-compost" },
   general: { label: "General", color: "text-primary" },
+  garbage: { label: "Landfill", color: "text-garbage" },
 };
 
 const ArticlesPage = () => {
@@ -270,6 +336,7 @@ const ArticlesPage = () => {
       compost: "composting",
       hazardous: "hazardous",
       trash: "general",
+      garbage: "garbage",
     };
     
     if (categoryFilter && categoryMap[categoryFilter]) {
