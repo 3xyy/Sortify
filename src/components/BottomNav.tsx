@@ -14,6 +14,23 @@ export const BottomNav = () => {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
 
+  // Reset navbar visibility on route change
+  useEffect(() => {
+    setIsVisible(true);
+    
+    // Force navbar to reset to bottom
+    const navbar = document.querySelector('nav');
+    if (navbar) {
+      (navbar as HTMLElement).style.cssText = `
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translate3d(0, 0, 0) !important;
+      `;
+    }
+  }, [location.pathname]);
+
   useEffect(() => {
     const handleFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
@@ -25,8 +42,20 @@ export const BottomNav = () => {
     const handleBlur = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        // Small delay to allow keyboard to close before showing navbar
-        setTimeout(() => setIsVisible(true), 100);
+        // Reset navbar position and visibility
+        setTimeout(() => {
+          setIsVisible(true);
+          const navbar = document.querySelector('nav');
+          if (navbar) {
+            (navbar as HTMLElement).style.cssText = `
+              position: fixed !important;
+              bottom: 0 !important;
+              left: 0 !important;
+              right: 0 !important;
+              transform: translate3d(0, 0, 0) !important;
+            `;
+          }
+        }, 100);
       }
     };
 
@@ -42,13 +71,18 @@ export const BottomNav = () => {
   if (!isVisible) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ 
-      transform: 'translate3d(0, 0, 0)',
-      WebkitTransform: 'translate3d(0, 0, 0)',
-      position: 'fixed',
-      backfaceVisibility: 'hidden',
-      WebkitBackfaceVisibility: 'hidden'
-    }}>
+    <nav 
+      key={location.pathname}
+      className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" 
+      style={{ 
+        transform: 'translate3d(0, 0, 0)',
+        WebkitTransform: 'translate3d(0, 0, 0)',
+        position: 'fixed',
+        bottom: '0',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden'
+      }}
+    >
       <div className="max-w-md mx-auto px-6 py-0.5 mb-0.5">
         <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {
