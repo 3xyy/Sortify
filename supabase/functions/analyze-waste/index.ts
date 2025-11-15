@@ -97,7 +97,7 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'gpt-5-2025-08-07',
         messages: [
           { 
             role: 'system', 
@@ -133,8 +133,13 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
     const data = await response.json();
     console.log('OpenAI response received');
     
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.choices?.[0]?.message?.content;
     console.log('AI analysis:', aiResponse);
+    
+    if (!aiResponse) {
+      console.error('Empty response from AI:', JSON.stringify(data));
+      throw new Error('Empty response from AI. Please try again.');
+    }
     
     // Parse the JSON response
     let analysisResult;
@@ -142,6 +147,7 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
       analysisResult = JSON.parse(aiResponse);
     } catch (e) {
       console.error('Failed to parse AI response as JSON:', e);
+      console.error('Raw response:', aiResponse);
       throw new Error('Invalid JSON response from AI');
     }
 
