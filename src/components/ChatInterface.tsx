@@ -84,8 +84,13 @@ export const ChatInterface = ({ itemName, category, categoryLabel, instructions,
       } else if (messageText.toLowerCase().includes("before disposing")) {
         response = `Before disposing:\n${instructions.map((step, i) => `${i + 1}. ${step}`).join("\n")}`;
       } else if (messageText.toLowerCase().includes("environmental impact")) {
-        const co2Value = parseFloat(co2Saved.match(/[\d.]+/)?.[0] || "0");
-        response = `This has ${co2Saved}. That's equivalent to ${(co2Value * 2.2).toFixed(1)} miles driven in an average car, or charging ${Math.round(co2Value * 121)} smartphones. By properly disposing of this item, you're making a positive environmental impact!`;
+        const co2Match = co2Saved.match(/[\d.]+/);
+        if (co2Match) {
+          const co2Value = parseFloat(co2Match[0]);
+          response = `This has ${co2Saved}. That's equivalent to ${(co2Value * 2.2).toFixed(1)} miles driven in an average car, or charging ${Math.round(co2Value * 121)} smartphones. By properly disposing of this item, you're making a positive environmental impact!`;
+        } else {
+          response = co2Saved;
+        }
       } else {
         response = "I can help answer questions about why this item fits its category, proper disposal steps, or its environmental impact. Try one of the suggested questions below!";
       }
