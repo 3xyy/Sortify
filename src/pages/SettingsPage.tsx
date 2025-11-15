@@ -318,16 +318,7 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> {new Date().toLocaleDateString('en-US', {
-                month: '2-digit',
-                day: '2-digit',
-                year: '2-digit'
-              }).replace(/\//g, '.') + '.' + new Date().toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-              }).replace(/:/g, '.')}
+              <span className="font-medium">App Version:</span> 11.15.25.14.32.18
             </div>
             <div>
               Made with ❤️ by <a 
