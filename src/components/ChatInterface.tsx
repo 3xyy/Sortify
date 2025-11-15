@@ -13,17 +13,19 @@ interface Message {
 
 interface ChatInterfaceProps {
   itemName: string;
+  category: string;
+  categoryLabel: string;
+  instructions: string[];
+  co2Saved: string;
   onClose: () => void;
 }
 
-const suggestedQuestions = [
-  "Why is this not recyclable?",
-  "What should I do before disposing?",
-  "Is soft plastic recyclable in my city?",
-  "How can I reuse this item?",
-];
-
-export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
+export const ChatInterface = ({ itemName, category, categoryLabel, instructions, co2Saved, onClose }: ChatInterfaceProps) => {
+  const suggestedQuestions = [
+    `Why is this ${categoryLabel.toLowerCase()}?`,
+    "What should I do before disposing?",
+    "How much environmental impact does this have?",
+  ];
   const chatKey = `chat_history_${itemName.replace(/\s+/g, '_')}`;
   
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -66,17 +68,30 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
     setInput("");
     setIsLoading(true);
 
-    // Mock AI response
+    // Generate response based on actual data
     setTimeout(() => {
+      let response = "";
+      
+      if (messageText.toLowerCase().includes("why is this")) {
+        response = `The material ${itemName} is ${categoryLabel.toLowerCase()} because it can be properly processed through ${category === "recycle" ? "recycling facilities" : category === "compost" ? "composting systems" : category === "hazardous" ? "specialized hazardous waste facilities" : "standard waste disposal"}.`;
+      } else if (messageText.toLowerCase().includes("before disposing")) {
+        response = `Before disposing:\n${instructions.map((step, i) => `${i + 1}. ${step}`).join("\n")}`;
+      } else if (messageText.toLowerCase().includes("environmental impact")) {
+        const co2Value = parseFloat(co2Saved.match(/[\d.]+/)?.[0] || "0");
+        response = `This has ${co2Saved}. That's equivalent to ${(co2Value * 2.2).toFixed(1)} miles driven in an average car, or charging ${Math.round(co2Value * 121)} smartphones. By properly disposing of this item, you're making a positive environmental impact!`;
+      } else {
+        response = "I can help answer questions about why this item fits its category, proper disposal steps, or its environmental impact. Try one of the suggested questions below!";
+      }
+      
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "This is a mock response. In production, this would connect to the Chat API to provide detailed answers about recycling rules, disposal methods, and environmental impact.",
+          content: response,
         },
       ]);
       setIsLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   return (
@@ -100,7 +115,7 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="h-[60vh] p-4">
+          <ScrollArea className="h-[50vh] p-4">
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div
@@ -155,7 +170,7 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
           </ScrollArea>
 
           {/* Suggested Questions - Always visible */}
-          <div className="px-4 py-3 pb-40 border-t">
+          <div className="px-4 py-3 pb-2 border-t">
             <p className="text-xs text-muted-foreground mb-2">Tap a question to ask:</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {suggestedQuestions.map((question, index) => (
