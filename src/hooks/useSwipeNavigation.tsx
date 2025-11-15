@@ -87,7 +87,7 @@ export const useSwipeNavigation = () => {
     };
 
     const handleSwipe = () => {
-      const swipeThreshold = 100; // Increased from 50 to make it less sensitive
+      const swipeThreshold = 50; // Reduced threshold for easier swiping
       const verticalThreshold = 50;
       const diffX = touchStartX - touchEndX;
       const diffY = Math.abs(touchStartY - touchEndY);
