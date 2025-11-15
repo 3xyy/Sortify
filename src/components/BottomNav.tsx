@@ -14,6 +14,11 @@ export const BottomNav = () => {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
 
+  // Hide navbar on install page
+  if (location.pathname === '/install') {
+    return null;
+  }
+
   // Reset navbar visibility on route change
   useEffect(() => {
     setIsVisible(true);
