@@ -128,7 +128,7 @@ const InstallPage = () => {
         <Button 
           variant="ghost" 
           className="w-full mt-4"
-          onClick={() => navigate('/')}
+          onClick={() => window.location.href = '/'}
         >
           Already installed?
         </Button>
