@@ -1,6 +1,7 @@
 import { Home, History, Settings, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -11,6 +12,34 @@ const navItems = [
 
 export const BottomNav = () => {
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        setIsVisible(false);
+      }
+    };
+
+    const handleBlur = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        // Small delay to allow keyboard to close before showing navbar
+        setTimeout(() => setIsVisible(true), 100);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocus);
+    document.addEventListener('focusout', handleBlur);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocus);
+      document.removeEventListener('focusout', handleBlur);
+    };
+  }, []);
+
+  if (!isVisible) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ 
