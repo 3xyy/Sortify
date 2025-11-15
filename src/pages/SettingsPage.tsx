@@ -17,30 +17,46 @@ const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
   const [visionApiStatus, setVisionApiStatus] = useState<"checking" | "connected" | "disconnected">("checking");
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem("vision_api_key") || "");
+  const [isTestingApi, setIsTestingApi] = useState(false);
   useSwipeNavigation();
 
+  const checkVisionApi = async (keyToTest?: string) => {
+    const testKey = keyToTest || apiKey || import.meta.env.VITE_VISION_API_KEY;
+    if (!testKey || testKey === "your_vision_api_key_here") {
+      setVisionApiStatus("disconnected");
+      return;
+    }
+
+    setIsTestingApi(true);
+    try {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/models", {
+        headers: {
+          "Authorization": `Bearer ${testKey}`
+        }
+      });
+      
+      setVisionApiStatus(response.ok ? "connected" : "disconnected");
+      if (response.ok) {
+        toast.success("API key is valid");
+      } else {
+        toast.error("API key is invalid");
+      }
+    } catch {
+      setVisionApiStatus("disconnected");
+      toast.error("Failed to validate API key");
+    } finally {
+      setIsTestingApi(false);
+    }
+  };
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem("vision_api_key", apiKey);
+    triggerHaptic("medium");
+    checkVisionApi(apiKey);
+  };
+
   useEffect(() => {
-    const checkVisionApi = async () => {
-      const apiKey = import.meta.env.VITE_VISION_API_KEY;
-      if (!apiKey || apiKey === "your_vision_api_key_here") {
-        setVisionApiStatus("disconnected");
-        return;
-      }
-
-      try {
-        // Make a simple test request to validate the API key
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/models", {
-          headers: {
-            "Authorization": `Bearer ${apiKey}`
-          }
-        });
-        
-        setVisionApiStatus(response.ok ? "connected" : "disconnected");
-      } catch {
-        setVisionApiStatus("disconnected");
-      }
-    };
-
     checkVisionApi();
   }, []);
 
@@ -264,14 +280,39 @@ const SettingsPage = () => {
           </Card>
 
           {/* API Info */}
-          <Card className="p-6 shadow-soft bg-muted/50">
-            <div className="flex items-center gap-2 mb-2">
+          <Card className="p-6 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
               <Zap className="h-4 w-4 text-accent" />
-              <h2 className="font-semibold text-sm">API Status</h2>
+              <h2 className="font-semibold">API Configuration</h2>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Vision API: {visionApiStatus === "checking" ? "Checking..." : visionApiStatus === "connected" ? "Connected" : "Disconnected"}
-            </p>
+            
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="apiKey" className="text-sm font-medium">Vision API Key</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Status: <span className={visionApiStatus === "connected" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                    {visionApiStatus === "checking" ? "Checking..." : visionApiStatus === "connected" ? "Connected" : "Disconnected"}
+                  </span>
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    id="apiKey"
+                    type="password"
+                    placeholder="Paste your API key here"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSaveApiKey}
+                    disabled={isTestingApi || !apiKey}
+                    size="sm"
+                  >
+                    {isTestingApi ? "Testing..." : "Save"}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </Card>
           <div className="h-8" />
         </div>
