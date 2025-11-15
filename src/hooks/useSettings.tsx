@@ -80,13 +80,17 @@ export const useSettings = () => {
   const triggerHaptic = (style: "light" | "medium" | "heavy" = "light") => {
     if (!settings.haptics) return;
     
-    if ("vibrate" in navigator) {
-      const patterns = {
-        light: [10],
-        medium: [20],
-        heavy: [30],
-      };
-      navigator.vibrate(patterns[style]);
+    try {
+      if ("vibrate" in navigator && typeof navigator.vibrate === "function") {
+        const patterns = {
+          light: 10,
+          medium: 20,
+          heavy: 30,
+        };
+        navigator.vibrate(patterns[style]);
+      }
+    } catch (error) {
+      console.log("Haptic feedback not supported");
     }
   };
 

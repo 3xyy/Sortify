@@ -14,8 +14,8 @@ export const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe">
-      <div className="max-w-md mx-auto px-4 py-2">
-        <div className="flex items-center justify-around">
+      <div className="max-w-md mx-auto px-6 py-3 mb-2">
+        <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -25,7 +25,7 @@ export const BottomNav = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl transition-smooth min-w-[70px]",
+                  "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-smooth min-w-[70px]",
                   isActive 
                     ? "bg-primary text-primary-foreground shadow-medium" 
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/10"

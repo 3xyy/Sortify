@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info } from "lucide-react";
+import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { ChatInterface } from "@/components/ChatInterface";
@@ -60,7 +60,18 @@ const ResultPage = () => {
   const Icon = config.icon;
 
   return (
-    <div className="min-h-screen gradient-hero pb-24">
+    <div className="min-h-screen gradient-hero pb-24 pt-safe">
+      <div className="px-6 pt-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="mb-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+      </div>
       <div className="relative">
         {/* Image */}
         <div className="relative h-80 overflow-hidden">
