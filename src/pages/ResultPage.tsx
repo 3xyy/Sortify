@@ -136,7 +136,21 @@ const ResultPage = () => {
         };
         const city = cityMap[settings.selectedCity] || settings.selectedCity;
 
-        console.log('Calling analyze-waste function...');
+        console.log('=== ANALYZE WASTE REQUEST STARTED ===');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Endpoint:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`);
+        console.log('Method: POST');
+        console.log('Headers:', {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+        });
+        console.log('Request Body:', {
+          imageData: `${imageData.substring(0, 100)}... (${imageData.length} chars total)`,
+          city
+        });
+        console.log('City selected:', city);
+        console.log('Image data size:', imageData.length, 'characters');
         
         // Call the edge function
         const { data, error } = await supabase.functions.invoke('analyze-waste', {
@@ -146,9 +160,15 @@ const ResultPage = () => {
           }
         });
 
-        console.log('=== FRONTEND: Edge function response ===');
+        console.log('=== ANALYZE WASTE RESPONSE RECEIVED ===');
+        console.log('Response timestamp:', new Date().toISOString());
         console.log('Error:', error);
+        console.log('Error type:', error ? typeof error : 'null');
+        console.log('Error details:', error ? JSON.stringify(error, null, 2) : 'none');
         console.log('Data:', data);
+        console.log('Data type:', data ? typeof data : 'null');
+        console.log('Full data object:', data ? JSON.stringify(data, null, 2) : 'null');
+        console.log('=== ANALYZE WASTE REQUEST COMPLETED ===');
 
         if (error) {
           console.error('Edge function error:', error);
