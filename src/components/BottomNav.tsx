@@ -13,7 +13,7 @@ export const BottomNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ transform: 'translateZ(0)' }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
       <div className="max-w-md mx-auto px-6 py-0.5 mb-0.5">
         <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {

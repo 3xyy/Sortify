@@ -284,7 +284,7 @@ const ArticlesPage = () => {
     const config = categoryConfig[selectedArticle.category];
     
   return (
-    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in" data-page-container>
       <div className="px-6 pt-4">
           <Button
             variant="ghost"

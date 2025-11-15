@@ -45,11 +45,16 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
     localStorage.setItem(chatKey, JSON.stringify(messages));
   }, [messages, chatKey]);
 
-  // Add padding to account for bottom nav
+  // Hide bottom nav when chat is open
   useEffect(() => {
-    document.body.style.paddingBottom = '80px';
+    const bottomNav = document.querySelector('nav');
+    if (bottomNav) {
+      (bottomNav as HTMLElement).style.display = 'none';
+    }
     return () => {
-      document.body.style.paddingBottom = '';
+      if (bottomNav) {
+        (bottomNav as HTMLElement).style.display = '';
+      }
     };
   }, []);
 
@@ -95,7 +100,7 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="h-[40vh] p-4">
+          <ScrollArea className="h-[60vh] p-4">
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div
@@ -149,44 +154,22 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
             </div>
           </ScrollArea>
 
-          {/* Suggested Questions */}
-          {messages.length === 1 && (
-            <div className="px-4 pb-3">
-              <p className="text-xs text-muted-foreground mb-2">Suggested questions:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestedQuestions.map((question, index) => (
-                  <Button
-                    key={index}
-                    variant="secondary"
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleSend(question)}
-                  >
-                    {question}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Ask a question..."
-                className="flex-1"
-                disabled={isLoading}
-              />
-              <Button 
-                size="icon" 
-                onClick={() => handleSend()}
-                disabled={!input.trim() || isLoading}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+          {/* Suggested Questions - Always visible */}
+          <div className="px-4 py-3 border-t">
+            <p className="text-xs text-muted-foreground mb-2">Tap a question to ask:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedQuestions.map((question, index) => (
+                <Button
+                  key={index}
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => handleSend(question)}
+                  disabled={isLoading}
+                >
+                  {question}
+                </Button>
+              ))}
             </div>
           </div>
         </Card>
