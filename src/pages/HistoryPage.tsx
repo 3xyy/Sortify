@@ -123,12 +123,12 @@ const categoryConfig = {
   recycle: {
     icon: Recycle,
     label: "Recycle",
-    color: "bg-success text-success-foreground",
+    color: "bg-recycle text-recycle-foreground",
   },
   compost: {
     icon: Leaf,
     label: "Compost",
-    color: "bg-lime text-lime-foreground",
+    color: "bg-compost text-compost-foreground",
   },
   trash: {
     icon: Trash2,

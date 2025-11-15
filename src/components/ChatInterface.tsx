@@ -45,6 +45,19 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
     localStorage.setItem(chatKey, JSON.stringify(messages));
   }, [messages, chatKey]);
 
+  // Hide bottom nav when chat is open
+  useEffect(() => {
+    const bottomNav = document.querySelector('nav');
+    if (bottomNav) {
+      bottomNav.style.display = 'none';
+    }
+    return () => {
+      if (bottomNav) {
+        bottomNav.style.display = '';
+      }
+    };
+  }, []);
+
   const handleSend = async (question?: string) => {
     const messageText = question || input;
     if (!messageText.trim() || isLoading) return;
