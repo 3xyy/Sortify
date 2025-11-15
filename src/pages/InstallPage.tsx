@@ -103,11 +103,23 @@ const InstallPage = () => {
             Install Now
           </Button>
         ) : (
-          <Card className="p-6 shadow-soft bg-muted/50 text-center">
-            <h3 className="font-semibold mb-2">Installation Instructions</h3>
-            <div className="text-sm text-muted-foreground space-y-2">
-              <p><strong>iOS:</strong> Tap Share → Add to Home Screen</p>
-              <p><strong>Android:</strong> Tap Menu → Install App</p>
+          <Card className="p-6 shadow-soft bg-muted/50">
+            <h3 className="font-semibold mb-3 text-center">Installation Instructions</h3>
+            <div className="text-sm text-muted-foreground space-y-3">
+              <div>
+                <p className="font-medium text-foreground mb-1">Computer (Chrome, Edge):</p>
+                <p>Click the Install button in the top-right corner of your browser</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground mb-1">iPhone/iPad:</p>
+                <p>1. Open this site in Safari or Chrome</p>
+                <p>2. Tap the Share button</p>
+                <p>3. Tap "Add to Home Screen"</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground mb-1">Android:</p>
+                <p>Tap the browser Menu (⋮) → "Install App"</p>
+              </div>
             </div>
           </Card>
         )}
