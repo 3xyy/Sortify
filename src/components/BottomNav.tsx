@@ -14,8 +14,14 @@ export const BottomNav = () => {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
 
-  // Hide navbar on install page
+  // Hide navbar on install page or when analyzing
   if (location.pathname === '/install') {
+    return null;
+  }
+
+  // Hide navbar when on result page and analyzing
+  const isAnalyzing = document.querySelector('[data-analyzing="true"]');
+  if (location.pathname.startsWith('/result') && isAnalyzing) {
     return null;
   }
 

@@ -68,7 +68,19 @@ const ResultPage = () => {
   const [showChat, setShowChat] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentTip, setCurrentTip] = useState(0);
   const { settings } = useSettings();
+
+  const tips = [
+    "Did you know that aluminum can be recycled forever?",
+    "Recycling one plastic bottle saves enough energy to power a light bulb for 3 hours",
+    "Glass can be recycled endlessly without losing quality",
+    "Composting reduces methane emissions from landfills",
+    "Recycling paper saves 17 trees per ton",
+    "Americans throw away 25 trillion Styrofoam cups every year",
+    "Recycling steel saves 60% of the energy needed to make new steel",
+    "E-waste contains valuable materials like gold and copper",
+  ];
   
   useEffect(() => {
     const analyzeImage = async () => {
@@ -162,15 +174,32 @@ const ResultPage = () => {
 
     analyzeImage();
   }, [state, navigate, settings.selectedCity]);
+
+  // Cycle tips during loading
+  useEffect(() => {
+    if (!isAnalyzing) return;
+    
+    const interval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % tips.length);
+    }, 3500);
+    
+    return () => clearInterval(interval);
+  }, [isAnalyzing, tips.length]);
   
   // Show loading state while analyzing
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen gradient-hero flex items-center justify-center" data-page-container>
-        <div className="text-center space-y-4 px-6">
+      <div className="min-h-screen gradient-hero flex items-center justify-center" data-analyzing="true">
+        <div className="text-center space-y-6 px-6 max-w-md">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <h2 className="text-2xl font-bold">Analyzing Your Item</h2>
           <p className="text-muted-foreground">Our AI is identifying the best way to dispose of this item...</p>
+          
+          <div className="mt-8 p-4 bg-accent/10 rounded-lg border border-accent/20">
+            <p className="text-sm text-foreground animate-fade-in" key={currentTip}>
+              💡 {tips[currentTip]}
+            </p>
+          </div>
         </div>
       </div>
     );
