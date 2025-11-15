@@ -3,10 +3,22 @@ import { Card } from "@/components/ui/card";
 import { Download, Smartphone, Zap, Leaf, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const InstallPage = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const navigate = useNavigate();
+
+  // Check if already running as PWA and redirect to home
+  useEffect(() => {
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                  (window.navigator as any).standalone === true;
+    
+    if (isPWA) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const handler = (e: Event) => {
