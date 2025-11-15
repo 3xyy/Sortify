@@ -105,8 +105,9 @@ const InstallPage = () => {
         ) : (
           <Card className="p-6 shadow-soft bg-muted/50 text-center">
             <h3 className="font-semibold mb-2">Installation Instructions</h3>
-            <div className="text-sm text-muted-foreground space-y-2">
-              <p><strong>iOS:</strong> Tap Share → Add to Home Screen</p>
+            <div className="text-sm text-muted-foreground space-y-2 text-left">
+              <p><strong>Computer Browser:</strong> Click the install button in the top right of your browser</p>
+              <p><strong>iOS:</strong> Open in Safari or Chrome, then tap Share → Add to Home Screen</p>
               <p><strong>Android:</strong> Tap Menu → Install App</p>
             </div>
           </Card>
