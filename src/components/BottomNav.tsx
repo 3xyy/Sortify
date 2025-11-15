@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/home" },
+  { icon: Home, label: "Home", path: "/" },
   { icon: History, label: "History", path: "/history" },
   { icon: BookOpen, label: "Articles", path: "/articles" },
   { icon: Settings, label: "Settings", path: "/settings" },
@@ -68,8 +68,7 @@ export const BottomNav = () => {
     };
   }, []);
 
-  // Hide navbar on install page or when not visible
-  if (location.pathname === '/install' || !isVisible) return null;
+  if (!isVisible) return null;
 
   return (
     <nav 
