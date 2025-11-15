@@ -45,16 +45,11 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
     localStorage.setItem(chatKey, JSON.stringify(messages));
   }, [messages, chatKey]);
 
-  // Hide bottom nav when chat is open
+  // Add padding to account for bottom nav
   useEffect(() => {
-    const bottomNav = document.querySelector('nav');
-    if (bottomNav) {
-      bottomNav.style.display = 'none';
-    }
+    document.body.style.paddingBottom = '80px';
     return () => {
-      if (bottomNav) {
-        bottomNav.style.display = '';
-      }
+      document.body.style.paddingBottom = '';
     };
   }, []);
 
@@ -100,7 +95,7 @@ export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="h-[50vh] p-4">
+          <ScrollArea className="h-[40vh] p-4">
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div

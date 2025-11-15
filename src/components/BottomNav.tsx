@@ -14,7 +14,7 @@ export const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ transform: 'translateZ(0)' }}>
-      <div className="max-w-md mx-auto px-6 py-1 mb-1">
+      <div className="max-w-md mx-auto px-6 py-0.5 mb-0.5">
         <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -25,9 +25,9 @@ export const BottomNav = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-smooth min-w-[70px]",
+                  "flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-2xl transition-smooth min-w-[70px]",
                   isActive 
-                    ? "bg-primary text-primary-foreground shadow-medium m-1.5" 
+                    ? "bg-primary text-primary-foreground shadow-medium m-1" 
                     : "text-muted-foreground active:text-foreground active:bg-accent/10"
                 )}
               >

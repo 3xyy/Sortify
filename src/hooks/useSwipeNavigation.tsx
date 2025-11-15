@@ -43,10 +43,12 @@ export const useSwipeNavigation = () => {
         const progress = Math.min(Math.abs(diffX) / 100, 1);
         setSwipeProgress(progress);
         
-        // Apply transform to body for visual feedback
-        const body = document.body;
-        body.style.transform = `translateX(${-diffX * 0.3}px)`;
-        body.style.transition = 'none';
+        // Apply transform to main content only, not navbar
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+          (mainContent as HTMLElement).style.transform = `translateX(${-diffX * 0.3}px)`;
+          (mainContent as HTMLElement).style.transition = 'none';
+        }
       }
     };
 
@@ -58,15 +60,20 @@ export const useSwipeNavigation = () => {
       isTouching = false;
       
       // Reset visual state
-      const body = document.body;
-      body.style.transform = '';
-      body.style.transition = 'transform 0.3s ease-out';
-      
-      setTimeout(() => {
-        body.style.transition = '';
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        (mainContent as HTMLElement).style.transform = '';
+        (mainContent as HTMLElement).style.transition = 'transform 0.3s ease-out';
+        
+        setTimeout(() => {
+          (mainContent as HTMLElement).style.transition = '';
+          setIsSwiping(false);
+          setSwipeProgress(0);
+        }, 300);
+      } else {
         setIsSwiping(false);
         setSwipeProgress(0);
-      }, 300);
+      }
       
       handleSwipe();
     };
@@ -112,8 +119,11 @@ export const useSwipeNavigation = () => {
       document.removeEventListener("touchend", handleTouchEnd);
       
       // Clean up any stuck transforms
-      document.body.style.transform = '';
-      document.body.style.transition = '';
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        (mainContent as HTMLElement).style.transform = '';
+        (mainContent as HTMLElement).style.transition = '';
+      }
     };
   }, [navigate, location.pathname]);
 
