@@ -6,9 +6,9 @@
   .pt-safe {
     padding-top: max(1.5rem, env(safe-area-inset-top));
   }
-  
+
   .pb-safe {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-bottom: max(0.3rem, env(safe-area-inset-bottom));
   }
 }
 
@@ -151,7 +151,7 @@ All colors MUST be HSL.
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }
-  
+
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
@@ -167,15 +167,15 @@ All colors MUST be HSL.
   .gradient-primary {
     background: var(--gradient-primary);
   }
-  
+
   .gradient-secondary {
     background: var(--gradient-secondary);
   }
-  
+
   .gradient-accent {
     background: var(--gradient-accent);
   }
-  
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
@@ -184,15 +184,15 @@ All colors MUST be HSL.
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
-  
+
   .shadow-medium {
     box-shadow: var(--shadow-medium);
   }
-  
+
   .shadow-large {
     box-shadow: var(--shadow-large);
   }
-  
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
@@ -201,7 +201,7 @@ All colors MUST be HSL.
   .transition-smooth {
     transition: var(--transition-smooth);
   }
-  
+
   .transition-bounce {
     transition: var(--transition-bounce);
   }
