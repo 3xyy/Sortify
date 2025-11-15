@@ -4,6 +4,7 @@ import { History, Recycle, Trash2, Leaf, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useSettings } from "@/hooks/useSettings";
 
 interface ScanItem {
   id: string;
@@ -144,10 +145,11 @@ const categoryConfig = {
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { isDemoMode } = useDemoMode();
+  const { triggerHaptic } = useSettings();
   useSwipeNavigation();
 
   return (
-    <div className="min-h-screen gradient-hero pb-32 pt-safe">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in">
       <div className="px-6 pt-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -173,9 +175,12 @@ const HistoryPage = () => {
             return (
               <Card 
                 key={item.id}
-                className="p-4 shadow-soft hover:shadow-medium transition-smooth cursor-pointer animate-fade-in"
+                className="p-4 shadow-soft active:shadow-medium transition-smooth cursor-pointer animate-fade-in active:scale-[0.98]"
                 style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => navigate(`/result/${item.id}`, { state: { item } })}
+                onClick={() => {
+                  triggerHaptic("light");
+                  navigate(`/result/${item.id}`, { state: { item } });
+                }}
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
@@ -207,6 +212,7 @@ const HistoryPage = () => {
         );
       })
         )}
+          <div className="h-8" />
         </div>
 
         {mockHistory.length === 0 && (

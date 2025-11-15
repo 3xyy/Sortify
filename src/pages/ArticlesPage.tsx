@@ -5,6 +5,7 @@ import { Search, AlertTriangle, Trash2, Recycle, Leaf, Package, ArrowLeft } from
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useSettings } from "@/hooks/useSettings";
 
 interface Article {
   id: string;
@@ -250,6 +251,7 @@ const categoryConfig = {
 const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const { triggerHaptic } = useSettings();
   useSwipeNavigation();
 
   const filteredArticles = articles.filter((article) => {
@@ -265,9 +267,9 @@ const ArticlesPage = () => {
     const Icon = selectedArticle.icon;
     const config = categoryConfig[selectedArticle.category];
     
-    return (
-      <div className="min-h-screen gradient-hero pb-32 pt-safe">
-        <div className="px-6 pt-4">
+  return (
+    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in">
+      <div className="px-6 pt-4">
           <Button
             variant="ghost"
             size="sm"
@@ -314,6 +316,7 @@ const ArticlesPage = () => {
               })}
             </div>
           </Card>
+          <div className="h-8" />
         </div>
       </div>
     );
@@ -349,8 +352,11 @@ const ArticlesPage = () => {
             return (
               <Card
                 key={article.id}
-                className="p-4 shadow-soft hover:shadow-medium transition-smooth cursor-pointer"
-                onClick={() => setSelectedArticle(article)}
+                className="p-4 shadow-soft active:shadow-medium transition-smooth cursor-pointer active:scale-[0.98]"
+                onClick={() => {
+                  triggerHaptic("light");
+                  setSelectedArticle(article);
+                }}
               >
                 <div className="flex items-start gap-3">
                   <div className={cn("h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0")}>
@@ -371,6 +377,7 @@ const ArticlesPage = () => {
               </Card>
             );
           })}
+          <div className="h-8" />
         </div>
 
         {filteredArticles.length === 0 && (

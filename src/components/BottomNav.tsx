@@ -13,8 +13,8 @@ export const BottomNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe">
-      <div className="max-w-md mx-auto px-6 py-3 mb-6">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ transform: 'translateZ(0)' }}>
+      <div className="max-w-md mx-auto px-6 py-2 mb-2">
         <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -28,7 +28,7 @@ export const BottomNav = () => {
                   "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-smooth min-w-[70px]",
                   isActive 
                     ? "bg-primary text-primary-foreground shadow-medium m-1.5" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                    : "text-muted-foreground active:text-foreground active:bg-accent/10"
                 )}
               >
                 <Icon className={cn("h-5 w-5", isActive && "animate-scale-in")} />

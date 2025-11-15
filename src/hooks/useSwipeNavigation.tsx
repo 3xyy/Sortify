@@ -10,29 +10,42 @@ export const useSwipeNavigation = () => {
   useEffect(() => {
     let touchStartX = 0;
     let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
       handleSwipe();
     };
 
     const handleSwipe = () => {
-      const swipeThreshold = 100;
-      const diff = touchStartX - touchEndX;
+      const swipeThreshold = 50; // More sensitive
+      const verticalThreshold = 100;
+      const diffX = touchStartX - touchEndX;
+      const diffY = Math.abs(touchStartY - touchEndY);
 
-      if (Math.abs(diff) < swipeThreshold) return;
+      // Ignore if vertical scroll
+      if (diffY > verticalThreshold) return;
+      if (Math.abs(diffX) < swipeThreshold) return;
 
       const currentIndex = routes.indexOf(location.pathname);
       if (currentIndex === -1) return;
 
-      if (diff > 0 && currentIndex < routes.length - 1) {
+      // Add haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10);
+      }
+
+      if (diffX > 0 && currentIndex < routes.length - 1) {
         // Swiped left - go to next page
         navigate(routes[currentIndex + 1]);
-      } else if (diff < 0 && currentIndex > 0) {
+      } else if (diffX < 0 && currentIndex > 0) {
         // Swiped right - go to previous page
         navigate(routes[currentIndex - 1]);
       }
