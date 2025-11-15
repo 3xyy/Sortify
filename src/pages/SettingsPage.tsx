@@ -22,42 +22,57 @@ const SettingsPage = () => {
   useSwipeNavigation();
 
   const checkVisionApi = async (keyToTest?: string) => {
-    const testKey = keyToTest || apiKey || import.meta.env.VITE_VISION_API_KEY;
-    if (!testKey || testKey === "your_vision_api_key_here") {
+    const testKey = keyToTest || apiKey;
+    if (!testKey) {
       setVisionApiStatus("disconnected");
+      toast.error("Please enter an OpenAI API key");
       return;
     }
 
     setIsTestingApi(true);
     try {
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/models", {
+      // Test the API key by making a simple request to OpenAI
+      const response = await fetch("https://api.openai.com/v1/models", {
         headers: {
           "Authorization": `Bearer ${testKey}`
         }
       });
       
-      setVisionApiStatus(response.ok ? "connected" : "disconnected");
       if (response.ok) {
-        toast.success("API key is valid");
+        setVisionApiStatus("connected");
+        toast.success("✅ OpenAI API key is valid!");
       } else {
-        toast.error("API key is invalid");
+        const error = await response.json();
+        setVisionApiStatus("disconnected");
+        toast.error(`❌ Invalid API key: ${error.error?.message || 'Authentication failed'}`);
       }
-    } catch {
+    } catch (error) {
       setVisionApiStatus("disconnected");
-      toast.error("Failed to validate API key");
+      toast.error("Failed to validate API key. Check your connection.");
     } finally {
       setIsTestingApi(false);
     }
   };
 
   const handleSaveApiKey = () => {
-    localStorage.setItem("vision_api_key", apiKey);
+    if (!apiKey.trim()) {
+      toast.error("Please enter an API key");
+      return;
+    }
+    localStorage.setItem("openai_api_key", apiKey);
     triggerHaptic("medium");
+    toast.success("API key saved locally");
     checkVisionApi(apiKey);
   };
 
   useEffect(() => {
-    checkVisionApi();
+    const savedKey = localStorage.getItem("openai_api_key");
+    if (savedKey) {
+      setApiKey(savedKey);
+      checkVisionApi(savedKey);
+    } else {
+      setVisionApiStatus("disconnected");
+    }
   }, []);
 
   return (
@@ -169,6 +184,78 @@ const SettingsPage = () => {
               <p className="text-xs text-muted-foreground">
                 Recycling rules vary by location
               </p>
+            </div>
+          </Card>
+
+          {/* OpenAI API Key */}
+          <Card className="p-6 shadow-soft border-2 border-primary/20">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-4 w-4 text-primary" />
+              <h2 className="font-semibold">OpenAI API Configuration</h2>
+              <div className={`ml-auto px-2 py-1 rounded-full text-xs font-medium ${
+                visionApiStatus === "connected" 
+                  ? "bg-success/10 text-success" 
+                  : visionApiStatus === "checking"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-destructive/10 text-destructive"
+              }`}>
+                {visionApiStatus === "connected" && "✓ Connected"}
+                {visionApiStatus === "checking" && "Checking..."}
+                {visionApiStatus === "disconnected" && "Not Connected"}
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="api-key">API Key</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder="sk-..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="flex-1 font-mono text-sm"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Enter your OpenAI API key to enable image analysis
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSaveApiKey}
+                  className="flex-1"
+                  disabled={!apiKey.trim()}
+                >
+                  Save API Key
+                </Button>
+                <Button 
+                  onClick={() => checkVisionApi()}
+                  variant="outline"
+                  disabled={!apiKey.trim() || isTestingApi}
+                  className="flex-1"
+                >
+                  {isTestingApi ? "Testing..." : "Test Connection"}
+                </Button>
+              </div>
+
+              <div className="p-3 bg-muted/50 rounded-lg text-xs space-y-1">
+                <p className="font-medium">ℹ️ How to Configure</p>
+                <p className="text-muted-foreground">
+                  1. Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary underline">platform.openai.com</a>
+                </p>
+                <p className="text-muted-foreground">
+                  2. Test it here to verify it works
+                </p>
+                <p className="text-muted-foreground">
+                  3. The OPENAI_API_KEY secret must be configured in your backend for the app to work
+                </p>
+                <p className="text-muted-foreground mt-2 font-medium text-warning">
+                  ⚠️ Note: This test validates your key, but the actual app uses the backend secret configuration.
+                </p>
+              </div>
             </div>
           </Card>
 
