@@ -6,6 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSettings } from "@/hooks/useSettings";
+import { useLocation } from "react-router-dom";
 
 interface Article {
   id: string;
@@ -243,8 +244,8 @@ Before Disposal:
 
 const categoryConfig = {
   hazardous: { label: "Hazardous", color: "text-hazard" },
-  recycling: { label: "Recycling", color: "text-blue-500" },
-  composting: { label: "Composting", color: "text-lime" },
+  recycling: { label: "Recycling", color: "text-recycle" },
+  composting: { label: "Composting", color: "text-compost" },
   general: { label: "General", color: "text-primary" },
 };
 
@@ -252,15 +253,30 @@ const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const { triggerHaptic } = useSettings();
+  const location = useLocation();
+  const categoryFilter = (location.state as { category?: string })?.category;
   useSwipeNavigation();
 
   const filteredArticles = articles.filter((article) => {
     const query = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = 
       article.title.toLowerCase().includes(query) ||
       article.description.toLowerCase().includes(query) ||
-      article.keywords.some((keyword) => keyword.includes(query))
-    );
+      article.keywords.some((keyword) => keyword.includes(query));
+    
+    // Map category names from ResultPage to article categories
+    const categoryMap: Record<string, string> = {
+      recycle: "recycling",
+      compost: "composting",
+      hazardous: "hazardous",
+      trash: "general",
+    };
+    
+    if (categoryFilter && categoryMap[categoryFilter]) {
+      return matchesSearch && article.category === categoryMap[categoryFilter];
+    }
+    
+    return matchesSearch;
   });
 
   if (selectedArticle) {

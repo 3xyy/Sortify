@@ -47,6 +47,12 @@ All colors MUST be HSL.
     --accent-foreground: 0 0% 100%;
     --accent-light: 185 70% 70%;
 
+    /* Category colors */
+    --recycle: 210 75% 50%;
+    --recycle-foreground: 0 0% 100%;
+    --compost: 120 60% 45%;
+    --compost-foreground: 0 0% 100%;
+    
     /* Lime highlight */
     --lime: 85 65% 60%;
     --lime-foreground: 160 60% 12%;
@@ -109,6 +115,12 @@ All colors MUST be HSL.
     --accent-foreground: 160 60% 12%;
     --accent-light: 185 70% 75%;
 
+    /* Category colors */
+    --recycle: 210 75% 55%;
+    --recycle-foreground: 0 0% 100%;
+    --compost: 120 60% 50%;
+    --compost-foreground: 0 0% 100%;
+    
     --lime: 85 65% 65%;
     --lime-foreground: 160 60% 12%;
 

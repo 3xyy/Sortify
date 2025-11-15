@@ -14,7 +14,7 @@ export const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border pb-safe" style={{ transform: 'translateZ(0)' }}>
-      <div className="max-w-md mx-auto px-6 py-2 mb-2">
+      <div className="max-w-md mx-auto px-6 py-1 mb-1">
         <div className="flex items-center justify-around gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;

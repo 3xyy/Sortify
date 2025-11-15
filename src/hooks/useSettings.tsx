@@ -80,12 +80,12 @@ export const useSettings = () => {
   const triggerHaptic = (style: "light" | "medium" | "heavy" = "light") => {
     if (!settings.enableHaptics) return;
     
-    if ("vibrate" in navigator && navigator.vibrate) {
+    if ("vibrate" in navigator) {
       try {
         const patterns = {
-          light: [10],
-          medium: [15, 10, 15],
-          heavy: [25, 10, 25],
+          light: 10,
+          medium: 25,
+          heavy: 50,
         };
         navigator.vibrate(patterns[style]);
       } catch (e) {

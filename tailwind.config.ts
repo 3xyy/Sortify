@@ -50,6 +50,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        recycle: {
+          DEFAULT: "hsl(var(--recycle))",
+          foreground: "hsl(var(--recycle-foreground))",
+        },
+        compost: {
+          DEFAULT: "hsl(var(--compost))",
+          foreground: "hsl(var(--compost-foreground))",
+        },
         lime: {
           DEFAULT: "hsl(var(--lime))",
           foreground: "hsl(var(--lime-foreground))",

@@ -11,13 +11,13 @@ const categoryConfig = {
   recycle: {
     icon: Recycle,
     label: "Recyclable",
-    color: "bg-success text-success-foreground",
+    color: "bg-recycle text-recycle-foreground",
     description: "This item can be recycled",
   },
   compost: {
     icon: Leaf,
     label: "Compostable",
-    color: "bg-lime text-lime-foreground",
+    color: "bg-compost text-compost-foreground",
     description: "Add to compost bin",
   },
   trash: {
@@ -192,7 +192,7 @@ const ResultPage = () => {
               variant="outline" 
               className="w-full" 
               size="xl"
-              onClick={() => navigate("/articles")}
+              onClick={() => navigate("/articles", { state: { category: result.category } })}
             >
               <Icon className="h-5 w-5" />
               Go To Article
