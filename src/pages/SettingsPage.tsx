@@ -17,62 +17,27 @@ const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
   const [visionApiStatus, setVisionApiStatus] = useState<"checking" | "connected" | "disconnected">("checking");
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem("vision_api_key") || "");
-  const [isTestingApi, setIsTestingApi] = useState(false);
   useSwipeNavigation();
 
-  const checkVisionApi = async (keyToTest?: string) => {
-    const testKey = keyToTest || apiKey;
-    if (!testKey) {
-      setVisionApiStatus("disconnected");
-      toast.error("Please enter an OpenAI API key");
-      return;
-    }
-
-    setIsTestingApi(true);
+  const checkVisionApi = async () => {
+    setVisionApiStatus("checking");
     try {
-      // Test the API key by making a simple request to OpenAI
-      const response = await fetch("https://api.openai.com/v1/models", {
+      // Test if the backend edge function is accessible
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`, {
+        method: 'OPTIONS',
         headers: {
-          "Authorization": `Bearer ${testKey}`
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
         }
       });
       
-      if (response.ok) {
-        setVisionApiStatus("connected");
-        toast.success("✅ OpenAI API key is valid!");
-      } else {
-        const error = await response.json();
-        setVisionApiStatus("disconnected");
-        toast.error(`❌ Invalid API key: ${error.error?.message || 'Authentication failed'}`);
-      }
-    } catch (error) {
+      setVisionApiStatus(response.ok ? "connected" : "disconnected");
+    } catch {
       setVisionApiStatus("disconnected");
-      toast.error("Failed to validate API key. Check your connection.");
-    } finally {
-      setIsTestingApi(false);
     }
-  };
-
-  const handleSaveApiKey = () => {
-    if (!apiKey.trim()) {
-      toast.error("Please enter an API key");
-      return;
-    }
-    localStorage.setItem("openai_api_key", apiKey);
-    triggerHaptic("medium");
-    toast.success("API key saved locally");
-    checkVisionApi(apiKey);
   };
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("openai_api_key");
-    if (savedKey) {
-      setApiKey(savedKey);
-      checkVisionApi(savedKey);
-    } else {
-      setVisionApiStatus("disconnected");
-    }
+    checkVisionApi();
   }, []);
 
   return (
@@ -187,78 +152,6 @@ const SettingsPage = () => {
             </div>
           </Card>
 
-          {/* OpenAI API Key */}
-          <Card className="p-6 shadow-soft border-2 border-primary/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-4 w-4 text-primary" />
-              <h2 className="font-semibold">OpenAI API Configuration</h2>
-              <div className={`ml-auto px-2 py-1 rounded-full text-xs font-medium ${
-                visionApiStatus === "connected" 
-                  ? "bg-success/10 text-success" 
-                  : visionApiStatus === "checking"
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-destructive/10 text-destructive"
-              }`}>
-                {visionApiStatus === "connected" && "✓ Connected"}
-                {visionApiStatus === "checking" && "Checking..."}
-                {visionApiStatus === "disconnected" && "Not Connected"}
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="api-key">API Key</Label>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    id="api-key"
-                    type="password"
-                    placeholder="sk-..."
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="flex-1 font-mono text-sm"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Enter your OpenAI API key to enable image analysis
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleSaveApiKey}
-                  className="flex-1"
-                  disabled={!apiKey.trim()}
-                >
-                  Save API Key
-                </Button>
-                <Button 
-                  onClick={() => checkVisionApi()}
-                  variant="outline"
-                  disabled={!apiKey.trim() || isTestingApi}
-                  className="flex-1"
-                >
-                  {isTestingApi ? "Testing..." : "Test Connection"}
-                </Button>
-              </div>
-
-              <div className="p-3 bg-muted/50 rounded-lg text-xs space-y-1">
-                <p className="font-medium">ℹ️ How to Configure</p>
-                <p className="text-muted-foreground">
-                  1. Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary underline">platform.openai.com</a>
-                </p>
-                <p className="text-muted-foreground">
-                  2. Test it here to verify it works
-                </p>
-                <p className="text-muted-foreground mt-2 font-medium text-warning">
-                  ⚠️ This tester validates your key format and permissions. The actual app requires configuring the OPENAI_API_KEY as a backend secret (already done for you).
-                </p>
-                <p className="text-muted-foreground mt-2">
-                  If scans are failing, the backend secret may need to be updated with your working key.
-                </p>
-              </div>
-            </div>
-          </Card>
-
           {/* Appearance */}
           <Card className="p-6 shadow-soft">
             <div className="flex items-center gap-2 mb-4">
@@ -366,38 +259,23 @@ const SettingsPage = () => {
             </div>
           </Card>
 
-          {/* API Info */}
+          {/* API Status */}
           <Card className="p-6 shadow-soft">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-4 w-4 text-accent" />
-              <h2 className="font-semibold">API Configuration</h2>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="apiKey" className="text-sm font-medium">Vision API Key</Label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Status: <span className={visionApiStatus === "connected" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
-                    {visionApiStatus === "checking" ? "Checking..." : visionApiStatus === "connected" ? "Connected" : "Disconnected"}
-                  </span>
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    placeholder="Paste your API key here"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleSaveApiKey}
-                    disabled={isTestingApi || !apiKey}
-                    size="sm"
-                  >
-                    {isTestingApi ? "Testing..." : "Save"}
-                  </Button>
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                <span className="font-semibold">API Status</span>
+              </div>
+              <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                visionApiStatus === "connected" 
+                  ? "bg-success/10 text-success" 
+                  : visionApiStatus === "checking"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-destructive/10 text-destructive"
+              }`}>
+                {visionApiStatus === "connected" && "✓ Connected"}
+                {visionApiStatus === "checking" && "Checking..."}
+                {visionApiStatus === "disconnected" && "✗ Not Connected"}
               </div>
             </div>
           </Card>
