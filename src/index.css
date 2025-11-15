@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@supports (padding-top: env(safe-area-inset-top)) {
+  .pt-safe {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+  }
+  
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

@@ -13,11 +13,11 @@ import { toast } from "sonner";
 const SettingsPage = () => {
   const { settings, updateSetting, triggerHaptic } = useSettings();
   const { theme, setTheme } = useTheme();
-  const { isDemoMode, enterDemoMode } = useDemoMode();
+  const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-6">
-      <div className="px-6">
+    <div className="min-h-screen gradient-hero pb-24 pt-safe">
+      <div className="px-6 pt-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Settings className="h-5 w-5 text-primary" />
@@ -185,12 +185,19 @@ const SettingsPage = () => {
                   value={settings.customColor}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (/^#[0-9A-F]{6}$/i.test(val)) {
+                    if (/^#[0-9A-F]{0,6}$/i.test(val)) {
                       updateSetting("customColor", val);
                     }
                   }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    if (!/^#[0-9A-F]{6}$/i.test(val)) {
+                      updateSetting("customColor", "#2fb89d");
+                    }
+                  }}
                   placeholder="#2fb89d"
-                  className="flex-1 h-12 font-mono"
+                  maxLength={7}
+                  className="flex-1 h-12 font-mono uppercase"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
@@ -210,18 +217,33 @@ const SettingsPage = () => {
               Explore the app with sample scan data
             </p>
             
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => {
-                enterDemoMode();
-                triggerHaptic("medium");
-                toast.success("Demo mode activated");
-              }}
-              disabled={isDemoMode}
-            >
-              {isDemoMode ? "Demo Mode Active" : "Open Demo"}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => {
+                  enterDemoMode();
+                  triggerHaptic("medium");
+                  toast.success("Demo mode activated");
+                }}
+                disabled={isDemoMode}
+              >
+                {isDemoMode ? "Demo Active" : "Open Demo"}
+              </Button>
+              {isDemoMode && (
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => {
+                    exitDemoMode();
+                    triggerHaptic("medium");
+                    toast.success("Exited demo mode");
+                  }}
+                >
+                  Exit Demo
+                </Button>
+              )}
+            </div>
           </Card>
 
           {/* API Info */}

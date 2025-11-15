@@ -24,27 +24,35 @@ const mockHistory: ScanItem[] = [
   },
   {
     id: "2",
-    itemName: "Banana Peel",
-    category: "compost",
-    date: "5 hours ago",
-    confidence: 98,
-    thumbnail: "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400&h=400&fit=crop"
+    itemName: "Glass Jar",
+    category: "recycle",
+    date: "Yesterday",
+    confidence: 92,
+    thumbnail: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=400&h=400&fit=crop"
   },
   {
     id: "3",
-    itemName: "Coffee Cup Lid",
-    category: "trash",
-    date: "Yesterday",
-    confidence: 87,
-    thumbnail: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&h=400&fit=crop"
+    itemName: "Pizza Box",
+    category: "compost",
+    date: "2 days ago",
+    confidence: 88,
+    thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
   },
   {
     id: "4",
-    itemName: "Battery",
+    itemName: "AA Battery",
     category: "hazardous",
-    date: "2 days ago",
-    confidence: 99,
-    thumbnail: "https://images.unsplash.com/photo-1614796577147-39141138d5e4?w=400&h=400&fit=crop"
+    date: "3 days ago",
+    confidence: 97,
+    thumbnail: "https://images.unsplash.com/photo-1609315582653-0d0e1d0f0b0f?w=400&h=400&fit=crop"
+  },
+  {
+    id: "5",
+    itemName: "Aluminum Can",
+    category: "recycle",
+    date: "4 days ago",
+    confidence: 98,
+    thumbnail: "https://images.unsplash.com/photo-1549317336-206569e8475c?w=400&h=400&fit=crop"
   },
 ];
 
@@ -76,8 +84,8 @@ const HistoryPage = () => {
   const { isDemoMode } = useDemoMode();
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-6">
-      <div className="px-6">
+    <div className="min-h-screen gradient-hero pb-24 pt-safe">
+      <div className="px-6 pt-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
             <History className="h-5 w-5 text-primary" />

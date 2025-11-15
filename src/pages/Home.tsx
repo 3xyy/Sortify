@@ -1,27 +1,27 @@
 import { ScanButton } from "@/components/ScanButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { History, Settings, Sparkles, Leaf, Camera, Upload, X } from "lucide-react";
+import { History, Settings, Sparkles, Leaf, Camera, Upload, X, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { useSettings } from "@/hooks/useSettings";
-import { useRef } from "react";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const Home = () => {
   const navigate = useNavigate();
   const { isDemoMode, exitDemoMode } = useDemoMode();
   const { triggerHaptic } = useSettings();
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [showScanOptions, setShowScanOptions] = useState(false);
 
   const handleScan = (file: File, type: "camera" | "upload") => {
     triggerHaptic("medium");
     toast.success(`Image selected via ${type}`, {
       description: "Processing with AI...",
+      position: "top-center",
     });
     
-    // Create mock scan result and navigate
     const mockId = Date.now().toString();
     navigate(`/result/${mockId}`, { 
       state: { 
@@ -31,10 +31,11 @@ const Home = () => {
     });
   };
 
-  const handleStartScan = () => {
-    triggerHaptic("light");
-    if (cameraInputRef.current) {
-      cameraInputRef.current.click();
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>, type: "camera" | "upload") => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleScan(file, type);
+      setShowScanOptions(false);
     }
   };
 
@@ -42,41 +43,51 @@ const Home = () => {
     <div className="min-h-screen gradient-hero pb-24">
       {/* Exit Demo Button */}
       {isDemoMode && (
-        <div className="pt-6 px-6 animate-fade-in">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              exitDemoMode();
-              triggerHaptic("medium");
-              toast.success("Exited demo mode");
-            }}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Exit Demo
-          </Button>
+        <div className="pt-safe px-6 animate-fade-in">
+          <div className="pt-6">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                exitDemoMode();
+                triggerHaptic("medium");
+                toast.success("Exited demo mode", { position: "top-center" });
+              }}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Exit Demo
+            </Button>
+          </div>
         </div>
       )}
 
       {/* Hero Section */}
-      <div className={isDemoMode ? "pt-6 px-6 text-center animate-fade-in" : "pt-16 px-6 text-center animate-fade-in"}>
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
-          <Leaf className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-primary">AI-Powered Recycling</span>
+      <div className={isDemoMode ? "pt-6 px-6 text-center animate-fade-in" : "pt-safe px-6 text-center animate-fade-in"}>
+        <div className="pt-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
+            <Leaf className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">AI-Powered Recycling</span>
+          </div>
+          
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+            Sortify AI
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-md mx-auto">
+            Scan items. Recycle smarter. Save the planet.
+          </p>
         </div>
-        
-        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
-          Sortify AI
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-md mx-auto">
-          Scan items. Recycle smarter. Save the planet.
-        </p>
       </div>
 
       {/* Quick Actions */}
       <div className="px-6 mt-12 animate-fade-up" style={{ animationDelay: "0.1s" }}>
         <div className="grid gap-4 max-w-md mx-auto">
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={handleStartScan}>
+          <Card 
+            className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" 
+            onClick={() => {
+              triggerHaptic("light");
+              setShowScanOptions(true);
+            }}
+          >
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <Camera className="h-6 w-6 text-primary" />
@@ -87,50 +98,48 @@ const Home = () => {
               </div>
             </div>
           </Card>
-          
-          {/* Hidden file inputs */}
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleScan(file, "camera");
-            }}
-          />
-          <input
-            ref={uploadInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleScan(file, "upload");
-            }}
-          />
 
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => navigate("/history")}>
+          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+            triggerHaptic("light");
+            navigate("/history");
+          }}>
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-accent/10 flex items-center justify-center">
                 <History className="h-6 w-6 text-accent" />
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-semibold">View History</h3>
-                <p className="text-sm text-muted-foreground">Past scans</p>
+                <p className="text-sm text-muted-foreground">Past scans & results</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => navigate("/settings")}>
+          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+            triggerHaptic("light");
+            navigate("/articles");
+          }}>
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-lime/10 flex items-center justify-center">
-                <Settings className="h-6 w-6 text-lime" />
+                <BookOpen className="h-6 w-6 text-lime" />
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold">Articles</h3>
+                <p className="text-sm text-muted-foreground">Learn about recycling</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+            triggerHaptic("light");
+            navigate("/settings");
+          }}>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Settings className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-semibold">Settings</h3>
-                <p className="text-sm text-muted-foreground">Customize experience</p>
+                <p className="text-sm text-muted-foreground">Customize your app</p>
               </div>
             </div>
           </Card>
@@ -139,27 +148,83 @@ const Home = () => {
 
       {/* Stats Section */}
       <div className="px-6 mt-12 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-        <Card className="p-6 shadow-medium max-w-md mx-auto gradient-primary">
-          <div className="flex items-center justify-between text-primary-foreground">
-            <div className="text-center flex-1">
-              <div className="text-3xl font-bold">127</div>
-              <div className="text-sm opacity-90">Items Scanned</div>
+        <Card className="p-6 shadow-soft bg-gradient-subtle">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="font-semibold">Your Impact</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{isDemoMode ? "47" : "0"}</div>
+              <div className="text-xs text-muted-foreground">Items Scanned</div>
             </div>
-            <div className="h-12 w-px bg-primary-foreground/20" />
-            <div className="text-center flex-1">
-              <div className="text-3xl font-bold">89%</div>
-              <div className="text-sm opacity-90">Correct Sort</div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-success">{isDemoMode ? "38" : "0"}</div>
+              <div className="text-xs text-muted-foreground">Recycled</div>
             </div>
-            <div className="h-12 w-px bg-primary-foreground/20" />
-            <div className="text-center flex-1">
-              <div className="text-3xl font-bold">52kg</div>
-              <div className="text-sm opacity-90">CO₂ Saved</div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">{isDemoMode ? "12kg" : "0kg"}</div>
+              <div className="text-xs text-muted-foreground">CO₂ Saved</div>
             </div>
           </div>
         </Card>
       </div>
 
-      
+      {/* Scan Options Sheet */}
+      <Sheet open={showScanOptions} onOpenChange={setShowScanOptions}>
+        <SheetContent side="bottom" className="rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle>Choose Scan Method</SheetTitle>
+            <SheetDescription>
+              Take a photo or select from your library
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-3 mt-6">
+            <label htmlFor="camera-input">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full justify-start"
+                asChild
+              >
+                <div className="cursor-pointer">
+                  <Camera className="h-5 w-5 mr-3" />
+                  Take Photo
+                </div>
+              </Button>
+              <input
+                id="camera-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => handleFileInput(e, "camera")}
+              />
+            </label>
+
+            <label htmlFor="upload-input">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full justify-start"
+                asChild
+              >
+                <div className="cursor-pointer">
+                  <Upload className="h-5 w-5 mr-3" />
+                  Choose from Library
+                </div>
+              </Button>
+              <input
+                id="upload-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileInput(e, "upload")}
+              />
+            </label>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
