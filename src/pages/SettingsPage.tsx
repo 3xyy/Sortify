@@ -17,10 +17,18 @@ const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
   const [visionApiStatus, setVisionApiStatus] = useState<"checking" | "connected" | "disconnected">("checking");
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   useSwipeNavigation();
 
   const checkVisionApi = async () => {
     setVisionApiStatus("checking");
+    console.log("=== API STATUS CHECK STARTED ===");
+    console.log("Endpoint:", `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`);
+    console.log("Method: OPTIONS");
+    console.log("Headers:", {
+      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
+    });
+    
     try {
       // Test if the backend edge function is accessible
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`, {
@@ -30,10 +38,31 @@ const SettingsPage = () => {
         }
       });
       
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+      console.log("=== API STATUS CHECK COMPLETED ===");
+      
       setVisionApiStatus(response.ok ? "connected" : "disconnected");
-    } catch {
+    } catch (error) {
+      console.error("=== API STATUS CHECK FAILED ===");
+      console.error("Error:", error);
       setVisionApiStatus("disconnected");
     }
+  };
+
+  const handleRetry = () => {
+    checkVisionApi();
+    setCooldownSeconds(10);
+    
+    const interval = setInterval(() => {
+      setCooldownSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
   useEffect(() => {
@@ -261,7 +290,7 @@ const SettingsPage = () => {
 
           {/* API Status */}
           <Card className="p-6 shadow-soft">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Zap className="h-4 w-4 text-primary" />
                 <span className="font-semibold">API Status</span>
@@ -278,12 +307,22 @@ const SettingsPage = () => {
                 {visionApiStatus === "disconnected" && "✗ Not Connected"}
               </div>
             </div>
+            {visionApiStatus === "disconnected" && (
+              <Button
+                onClick={handleRetry}
+                disabled={cooldownSeconds > 0}
+                variant="outline"
+                className="w-full"
+              >
+                {cooldownSeconds > 0 ? `Try Again (${cooldownSeconds}s)` : "Try Again"}
+              </Button>
+            )}
           </Card>
 
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 11.15.25.13.00
+              <span className="font-medium">App Version:</span> 11.15.25.23.33
             </div>
             <div>
               Made with ❤️ by <a 
