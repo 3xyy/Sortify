@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { History, Recycle, Trash2, Leaf, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDemoMode } from "@/contexts/DemoContext";
 
 interface ScanItem {
   id: string;
@@ -72,6 +73,7 @@ const categoryConfig = {
 
 const HistoryPage = () => {
   const navigate = useNavigate();
+  const { isDemoMode } = useDemoMode();
 
   return (
     <div className="min-h-screen gradient-hero pb-24 pt-6">
@@ -83,8 +85,17 @@ const HistoryPage = () => {
           <h1 className="text-2xl font-bold">Scan History</h1>
         </div>
 
-        <div className="space-y-3 animate-fade-up">
-          {mockHistory.map((item, index) => {
+      <div className="space-y-3 animate-fade-up">
+        {!isDemoMode ? (
+          <Card className="p-8 text-center shadow-soft">
+            <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-semibold mb-2">No Scan History</h3>
+            <p className="text-sm text-muted-foreground">
+              Start scanning items to see your history here
+            </p>
+          </Card>
+        ) : (
+          mockHistory.map((item, index) => {
             const config = categoryConfig[item.category];
             const Icon = config.icon;
             
@@ -121,9 +132,10 @@ const HistoryPage = () => {
                     </span>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
+          </Card>
+        );
+      })
+        )}
         </div>
 
         {mockHistory.length === 0 && (

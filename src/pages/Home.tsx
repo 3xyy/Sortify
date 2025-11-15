@@ -1,14 +1,22 @@
 import { ScanButton } from "@/components/ScanButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { History, Settings, Sparkles, Leaf } from "lucide-react";
+import { History, Settings, Sparkles, Leaf, Camera, Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useDemoMode } from "@/contexts/DemoContext";
+import { useSettings } from "@/hooks/useSettings";
+import { useRef } from "react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isDemoMode, exitDemoMode } = useDemoMode();
+  const { triggerHaptic } = useSettings();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const handleScan = (file: File, type: "camera" | "upload") => {
+    triggerHaptic("medium");
     toast.success(`Image selected via ${type}`, {
       description: "Processing with AI...",
     });
@@ -23,10 +31,35 @@ const Home = () => {
     });
   };
 
+  const handleStartScan = () => {
+    triggerHaptic("light");
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-hero pb-24">
+      {/* Exit Demo Button */}
+      {isDemoMode && (
+        <div className="pt-6 px-6 animate-fade-in">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              exitDemoMode();
+              triggerHaptic("medium");
+              toast.success("Exited demo mode");
+            }}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Exit Demo
+          </Button>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <div className="pt-16 px-6 text-center animate-fade-in">
+      <div className={isDemoMode ? "pt-6 px-6 text-center animate-fade-in" : "pt-16 px-6 text-center animate-fade-in"}>
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
           <Leaf className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-primary">AI-Powered Recycling</span>
@@ -43,17 +76,40 @@ const Home = () => {
       {/* Quick Actions */}
       <div className="px-6 mt-12 animate-fade-up" style={{ animationDelay: "0.1s" }}>
         <div className="grid gap-4 max-w-md mx-auto">
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {}}>
+          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={handleStartScan}>
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-primary" />
+                <Camera className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-semibold">Start Scan</h3>
-                <p className="text-sm text-muted-foreground">Quick AI analysis</p>
+                <p className="text-sm text-muted-foreground">Take photo or upload</p>
               </div>
             </div>
           </Card>
+          
+          {/* Hidden file inputs */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleScan(file, "camera");
+            }}
+          />
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleScan(file, "upload");
+            }}
+          />
 
           <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => navigate("/history")}>
             <div className="flex items-center gap-4">
@@ -103,7 +159,7 @@ const Home = () => {
         </Card>
       </div>
 
-      <ScanButton onScan={handleScan} />
+      
     </div>
   );
 };
