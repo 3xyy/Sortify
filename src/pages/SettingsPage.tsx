@@ -314,7 +314,32 @@ const SettingsPage = () => {
               </div>
             </div>
           </Card>
-          <div className="h-8" />
+
+          {/* Version and Attribution */}
+          <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
+            <div>
+              <span className="font-medium">App Version:</span> {new Date().toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: '2-digit'
+              }).replace(/\//g, '.') + '.' + new Date().toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+              }).replace(/:/g, '.')}
+            </div>
+            <div>
+              Made with ❤️ by <a 
+                href="https://www.linkedin.com/in/yuvrajdar/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                Yuvraj Dar
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
