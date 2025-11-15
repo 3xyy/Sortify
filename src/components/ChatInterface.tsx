@@ -55,7 +55,14 @@ export const ChatInterface = ({ itemName, category, categoryLabel, instructions,
     }
     return () => {
       if (bottomNav) {
-        (bottomNav as HTMLElement).style.display = '';
+        (bottomNav as HTMLElement).style.cssText = `
+          display: block !important;
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          transform: translate3d(0, 0, 0) !important;
+        `;
       }
     };
   }, []);
