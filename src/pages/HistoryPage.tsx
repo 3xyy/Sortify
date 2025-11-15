@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { History, Recycle, Trash2, Leaf, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDemoMode } from "@/contexts/DemoContext";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface ScanItem {
   id: string;
@@ -11,6 +12,12 @@ interface ScanItem {
   date: string;
   confidence: number;
   thumbnail: string;
+  details: {
+    contamination: string;
+    instructions: string[];
+    localRule: string;
+    co2Saved: string;
+  };
 }
 
 const mockHistory: ScanItem[] = [
@@ -20,7 +27,18 @@ const mockHistory: ScanItem[] = [
     category: "recycle",
     date: "2 hours ago",
     confidence: 95,
-    thumbnail: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop"
+    thumbnail: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Clean - ready to recycle",
+      instructions: [
+        "Remove cap and label if possible",
+        "Rinse out any remaining liquid",
+        "Crush to save space",
+        "Place in blue recycling bin",
+      ],
+      localRule: "San Francisco accepts #1 PET plastic bottles in curbside recycling",
+      co2Saved: "0.5 kg CO₂ saved by recycling",
+    },
   },
   {
     id: "2",
@@ -28,7 +46,18 @@ const mockHistory: ScanItem[] = [
     category: "recycle",
     date: "Yesterday",
     confidence: 92,
-    thumbnail: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=400&h=400&fit=crop"
+    thumbnail: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Clean - no residue detected",
+      instructions: [
+        "Remove metal lid",
+        "Rinse thoroughly",
+        "No need to remove label",
+        "Place in glass recycling bin",
+      ],
+      localRule: "All clear glass containers are accepted in San Francisco recycling",
+      co2Saved: "0.3 kg CO₂ saved by recycling",
+    },
   },
   {
     id: "3",
@@ -36,7 +65,18 @@ const mockHistory: ScanItem[] = [
     category: "compost",
     date: "2 days ago",
     confidence: 88,
-    thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop"
+    thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Grease detected - compost only",
+      instructions: [
+        "Remove any leftover food",
+        "Tear into smaller pieces",
+        "Only compost the greasy parts",
+        "Recycle clean cardboard parts separately",
+      ],
+      localRule: "San Francisco accepts food-soiled paper in green compost bins",
+      co2Saved: "0.2 kg CO₂ saved by composting",
+    },
   },
   {
     id: "4",
@@ -44,7 +84,18 @@ const mockHistory: ScanItem[] = [
     category: "hazardous",
     date: "3 days ago",
     confidence: 97,
-    thumbnail: "https://images.unsplash.com/photo-1609315582653-0d0e1d0f0b0f?w=400&h=400&fit=crop"
+    thumbnail: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Hazardous material detected",
+      instructions: [
+        "Never throw in regular trash",
+        "Store in a cool, dry place",
+        "Place in a sealed bag",
+        "Take to hazardous waste facility",
+      ],
+      localRule: "San Francisco requires proper disposal at designated collection sites",
+      co2Saved: "Prevents soil contamination",
+    },
   },
   {
     id: "5",
@@ -52,7 +103,18 @@ const mockHistory: ScanItem[] = [
     category: "recycle",
     date: "4 days ago",
     confidence: 98,
-    thumbnail: "https://images.unsplash.com/photo-1549317336-206569e8475c?w=400&h=400&fit=crop"
+    thumbnail: "https://images.unsplash.com/photo-1549317336-206569e8475c?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Clean - excellent condition",
+      instructions: [
+        "Empty all contents",
+        "Rinse with water",
+        "Crushing optional but saves space",
+        "Place in metal recycling bin",
+      ],
+      localRule: "Aluminum cans are highly valuable and accepted everywhere in San Francisco",
+      co2Saved: "0.8 kg CO₂ saved by recycling",
+    },
   },
 ];
 
@@ -82,10 +144,11 @@ const categoryConfig = {
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { isDemoMode } = useDemoMode();
+  useSwipeNavigation();
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-safe">
-      <div className="px-6 pt-6">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe">
+      <div className="px-6 pt-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
             <History className="h-5 w-5 text-primary" />
@@ -112,7 +175,7 @@ const HistoryPage = () => {
                 key={item.id}
                 className="p-4 shadow-soft hover:shadow-medium transition-smooth cursor-pointer animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => navigate(`/result/${item.id}`)}
+                onClick={() => navigate(`/result/${item.id}`, { state: { item } })}
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">

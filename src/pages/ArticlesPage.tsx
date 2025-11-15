@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Search, AlertTriangle, Trash2, Recycle, Leaf, Package, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 interface Article {
   id: string;
@@ -249,6 +250,7 @@ const categoryConfig = {
 const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  useSwipeNavigation();
 
   const filteredArticles = articles.filter((article) => {
     const query = searchQuery.toLowerCase();
@@ -264,8 +266,8 @@ const ArticlesPage = () => {
     const config = categoryConfig[selectedArticle.category];
     
     return (
-      <div className="min-h-screen gradient-hero pb-24 pt-safe">
-        <div className="px-6 pt-6">
+      <div className="min-h-screen gradient-hero pb-32 pt-safe">
+        <div className="px-6 pt-4">
           <Button
             variant="ghost"
             size="sm"
@@ -318,8 +320,8 @@ const ArticlesPage = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-safe">
-      <div className="px-6 pt-6">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe">
+      <div className="px-6 pt-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Package className="h-5 w-5 text-primary" />

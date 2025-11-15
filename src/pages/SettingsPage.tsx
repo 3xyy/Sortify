@@ -9,15 +9,17 @@ import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { toast } from "sonner";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 const SettingsPage = () => {
   const { settings, updateSetting, triggerHaptic } = useSettings();
   const { theme, setTheme } = useTheme();
   const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
+  useSwipeNavigation();
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-safe">
-      <div className="px-6 pt-6">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe">
+      <div className="px-6 pt-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Settings className="h-5 w-5 text-primary" />

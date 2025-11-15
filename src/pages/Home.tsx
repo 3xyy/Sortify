@@ -8,12 +8,14 @@ import { useDemoMode } from "@/contexts/DemoContext";
 import { useSettings } from "@/hooks/useSettings";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 const Home = () => {
   const navigate = useNavigate();
   const { isDemoMode, exitDemoMode } = useDemoMode();
   const { triggerHaptic } = useSettings();
   const [showScanOptions, setShowScanOptions] = useState(false);
+  useSwipeNavigation();
 
   const handleScan = (file: File, type: "camera" | "upload") => {
     triggerHaptic("medium");
@@ -40,29 +42,9 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-hero pb-24">
-      {/* Exit Demo Button */}
-      {isDemoMode && (
-        <div className="pt-safe px-6 animate-fade-in">
-          <div className="pt-6">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                exitDemoMode();
-                triggerHaptic("medium");
-                toast.success("Exited demo mode", { position: "top-center" });
-              }}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Exit Demo
-            </Button>
-          </div>
-        </div>
-      )}
-
+    <div className="min-h-screen gradient-hero pb-32">
       {/* Hero Section */}
-      <div className={isDemoMode ? "pt-6 px-6 text-center animate-fade-in" : "pt-safe px-6 text-center animate-fade-in"}>
+      <div className="pt-safe px-6 text-center animate-fade-in">
         <div className="pt-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
             <Leaf className="h-4 w-4 text-primary" />

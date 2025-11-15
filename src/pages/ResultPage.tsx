@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { ChatInterface } from "@/components/ChatInterface";
 
@@ -54,18 +54,32 @@ const mockResult = {
 const ResultPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { state } = useLocation();
   const [showChat, setShowChat] = useState(false);
   
-  const config = categoryConfig[mockResult.category];
+  // Use state data if available, otherwise fall back to mock data
+  const item = state?.item;
+  const result = item ? {
+    itemName: item.itemName,
+    category: item.category,
+    confidence: item.confidence,
+    contamination: item.details.contamination,
+    instructions: item.details.instructions,
+    localRule: item.details.localRule,
+    co2Saved: item.details.co2Saved,
+    imageUrl: item.thumbnail,
+  } : mockResult;
+  
+  const config = categoryConfig[result.category];
   const Icon = config.icon;
 
   return (
-    <div className="min-h-screen gradient-hero pb-24 pt-safe">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe">
       <div className="px-6 pt-4">
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/history")}
           className="mb-2"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -76,8 +90,8 @@ const ResultPage = () => {
         {/* Image */}
         <div className="relative h-80 overflow-hidden">
           <img 
-            src={mockResult.imageUrl}
-            alt={mockResult.itemName}
+            src={result.imageUrl}
+            alt={result.itemName}
             className="w-full h-full object-cover animate-fade-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
@@ -97,7 +111,7 @@ const ResultPage = () => {
 
           {/* Item Name */}
           <h1 className="text-3xl font-bold text-center mb-2">
-            {mockResult.itemName}
+            {result.itemName}
           </h1>
           <p className="text-center text-muted-foreground mb-6">
             {config.description}
@@ -107,9 +121,9 @@ const ResultPage = () => {
           <Card className="p-4 shadow-soft mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">AI Confidence</span>
-              <span className="text-sm font-bold text-primary">{mockResult.confidence}%</span>
+              <span className="text-sm font-bold text-primary">{result.confidence}%</span>
             </div>
-            <Progress value={mockResult.confidence} className="h-2" />
+            <Progress value={result.confidence} className="h-2" />
           </Card>
 
           {/* Contamination Status */}
@@ -118,7 +132,7 @@ const ResultPage = () => {
               <Info className="h-5 w-5 text-success mt-0.5" />
               <div>
                 <div className="font-medium mb-1">Contamination Check</div>
-                <div className="text-sm text-muted-foreground">{mockResult.contamination}</div>
+                <div className="text-sm text-muted-foreground">{result.contamination}</div>
               </div>
             </div>
           </Card>
@@ -130,7 +144,7 @@ const ResultPage = () => {
               Disposal Instructions
             </h2>
             <ol className="space-y-3">
-              {mockResult.instructions.map((instruction, index) => (
+              {result.instructions.map((instruction, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <span className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center">
                     {index + 1}
@@ -147,7 +161,7 @@ const ResultPage = () => {
               <MapPin className="h-5 w-5 text-accent mt-0.5" />
               <div>
                 <div className="font-medium mb-1">Local Recycling Rule</div>
-                <div className="text-sm text-muted-foreground">{mockResult.localRule}</div>
+                <div className="text-sm text-muted-foreground">{result.localRule}</div>
               </div>
             </div>
           </Card>
@@ -159,7 +173,7 @@ const ResultPage = () => {
                 <Leaf className="h-5 w-5" />
                 <span className="font-medium">Environmental Impact</span>
               </div>
-              <span className="font-bold">{mockResult.co2Saved}</span>
+              <span className="font-bold">{result.co2Saved}</span>
             </div>
           </Card>
 
@@ -190,7 +204,7 @@ const ResultPage = () => {
       {/* Chat Interface */}
       {showChat && (
         <ChatInterface 
-          itemName={mockResult.itemName}
+          itemName={result.itemName}
           onClose={() => setShowChat(false)}
         />
       )}
