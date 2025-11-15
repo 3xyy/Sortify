@@ -4,7 +4,7 @@ interface Settings {
   showConfidence: boolean;
   showContamination: boolean;
   showCO2: boolean;
-  haptics: boolean;
+  enableHaptics: boolean;
   selectedCity: string;
   customColor: string;
 }
@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS: Settings = {
   showConfidence: true,
   showContamination: true,
   showCO2: true,
-  haptics: true,
+  enableHaptics: true,
   selectedCity: "san-francisco",
   customColor: "#2fb89d",
 };
@@ -78,9 +78,9 @@ export const useSettings = () => {
   };
 
   const triggerHaptic = (style: "light" | "medium" | "heavy" = "light") => {
-    if (!settings.haptics) return;
+    if (!settings.enableHaptics) return;
     
-    if ("vibrate" in navigator) {
+    if ("vibrate" in navigator && navigator.vibrate) {
       try {
         const patterns = {
           light: [10],

@@ -243,7 +243,7 @@ Before Disposal:
 
 const categoryConfig = {
   hazardous: { label: "Hazardous", color: "text-hazard" },
-  recycling: { label: "Recycling", color: "text-success" },
+  recycling: { label: "Recycling", color: "text-blue-500" },
   composting: { label: "Composting", color: "text-lime" },
   general: { label: "General", color: "text-primary" },
 };

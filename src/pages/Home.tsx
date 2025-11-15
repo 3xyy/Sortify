@@ -45,7 +45,7 @@ const Home = () => {
     <div className="min-h-screen gradient-hero pb-32 animate-fade-in">
       {/* Hero Section */}
       <div className="pt-safe px-6 text-center animate-fade-in">
-        <div className="pt-16">
+        <div className="pt-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
             <Leaf className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">AI-Powered Recycling</span>

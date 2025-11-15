@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,14 +24,26 @@ const suggestedQuestions = [
 ];
 
 export const ChatInterface = ({ itemName, onClose }: ChatInterfaceProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Hi! I'm here to answer questions about your ${itemName}. What would you like to know?`,
-    },
-  ]);
+  const chatKey = `chat_history_${itemName.replace(/\s+/g, '_')}`;
+  
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem(chatKey);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return [
+      {
+        role: "assistant",
+        content: `Hi! I'm here to answer questions about your ${itemName}. What would you like to know?`,
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(chatKey, JSON.stringify(messages));
+  }, [messages, chatKey]);
 
   const handleSend = async (question?: string) => {
     const messageText = question || input;
