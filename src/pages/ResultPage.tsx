@@ -146,9 +146,36 @@ const ResultPage = () => {
           }
         });
 
+        console.log('=== FRONTEND: Edge function response ===');
+        console.log('Error:', error);
+        console.log('Data:', data);
+
         if (error) {
-          console.error('Error analyzing image:', error);
-          throw error;
+          console.error('Edge function error:', error);
+          
+          // Show detailed error page instead of mock data
+          setResult({
+            error: true,
+            errorTitle: "Analysis Failed",
+            errorMessage: data?.error || error.message,
+            errorDetails: data?.details || error.toString(),
+            imageUrl: URL.createObjectURL(file),
+            timestamp: new Date().toISOString(),
+          });
+          return;
+        }
+
+        if (!data || typeof data !== 'object') {
+          console.error('Invalid data received:', data);
+          setResult({
+            error: true,
+            errorTitle: "Invalid Response",
+            errorMessage: "Received invalid data from server",
+            errorDetails: JSON.stringify(data, null, 2),
+            imageUrl: URL.createObjectURL(file),
+            timestamp: new Date().toISOString(),
+          });
+          return;
         }
 
         console.log('Analysis result:', data);
@@ -164,9 +191,19 @@ const ResultPage = () => {
 
       } catch (error) {
         console.error('Failed to analyze image:', error);
-        toast.error("Failed to analyze image. Please check your API key configuration in Settings.");
-        // Use mock data as fallback
-        setResult(mockResult);
+        
+        // Show detailed error instead of mock data
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        
+        setResult({
+          error: true,
+          errorTitle: "Analysis Error",
+          errorMessage: errorMessage,
+          errorDetails: errorStack || JSON.stringify(error, null, 2),
+          imageUrl: file ? URL.createObjectURL(file) : undefined,
+          timestamp: new Date().toISOString(),
+        });
       } finally {
         setIsAnalyzing(false);
       }
@@ -212,6 +249,119 @@ const ResultPage = () => {
           <h2 className="text-2xl font-bold">No Image Found</h2>
           <p className="text-muted-foreground">Please scan an item first</p>
           <Button onClick={() => navigate("/")}>Go Home</Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Show error page if analysis failed
+  if (result.error) {
+    return (
+      <div className="min-h-screen gradient-hero pb-32 pt-safe">
+        <div className="px-6 pt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="mb-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+        
+        <div className="px-6 space-y-4 max-w-2xl mx-auto">
+          {result.imageUrl && (
+            <div className="relative h-60 overflow-hidden rounded-lg">
+              <img 
+                src={result.imageUrl}
+                alt="Failed scan"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          
+          <Card className="p-6 border-destructive/20 bg-destructive/5">
+            <div className="flex items-start gap-3 mb-4">
+              <AlertTriangle className="h-6 w-6 text-destructive mt-0.5" />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-destructive mb-1">
+                  {result.errorTitle}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {result.timestamp && new Date(result.timestamp).toLocaleString()}
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold mb-2 text-sm">Error Message</h3>
+                <Card className="p-3 bg-background">
+                  <p className="text-sm font-mono text-destructive">
+                    {result.errorMessage}
+                  </p>
+                </Card>
+              </div>
+              
+              {result.errorDetails && (
+                <div>
+                  <h3 className="font-semibold mb-2 text-sm">Technical Details</h3>
+                  <Card className="p-3 bg-background max-h-60 overflow-auto">
+                    <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap break-all">
+                      {result.errorDetails}
+                    </pre>
+                  </Card>
+                </div>
+              )}
+              
+              <div className="pt-4 border-t">
+                <h3 className="font-semibold mb-3 text-sm">Common Solutions</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      <strong>API Key Not Configured:</strong> Make sure the OPENAI_API_KEY secret is set in your backend
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      <strong>Invalid API Key:</strong> Verify your key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" className="text-primary underline">platform.openai.com</a>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      <strong>No Credits:</strong> Check your OpenAI account has available credits
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>
+                      <strong>Model Access:</strong> Ensure your API key has access to GPT-5 models
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={() => navigate("/settings")}
+                  className="flex-1"
+                >
+                  Go to Settings
+                </Button>
+                <Button 
+                  onClick={() => navigate("/")}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     );
