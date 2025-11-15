@@ -149,7 +149,7 @@ const HistoryPage = () => {
   useSwipeNavigation();
 
   return (
-    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in">
+    <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in" data-page-container>
       <div className="px-6 pt-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">

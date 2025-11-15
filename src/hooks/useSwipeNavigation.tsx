@@ -43,11 +43,19 @@ export const useSwipeNavigation = () => {
         const progress = Math.min(Math.abs(diffX) / 100, 1);
         setSwipeProgress(progress);
         
-        // Apply transform to main content only, not navbar
-        const mainContent = document.querySelector('main');
-        if (mainContent) {
-          (mainContent as HTMLElement).style.transform = `translateX(${-diffX * 0.3}px)`;
-          (mainContent as HTMLElement).style.transition = 'none';
+        // Get current and target page indices
+        const currentIndex = routes.indexOf(location.pathname);
+        const nextIndex = diffX > 0 ? currentIndex + 1 : currentIndex - 1;
+        
+        // Only show animation if there's a valid next page
+        if (nextIndex >= 0 && nextIndex < routes.length) {
+          // Apply smooth transform showing both current and next page
+          const containers = document.querySelectorAll('[data-page-container]');
+          containers.forEach((container) => {
+            (container as HTMLElement).style.transform = `translateX(${-diffX}px)`;
+            (container as HTMLElement).style.transition = 'none';
+            (container as HTMLElement).style.opacity = String(1 - Math.abs(diffX) / 200);
+          });
         }
       }
     };
@@ -59,21 +67,21 @@ export const useSwipeNavigation = () => {
       touchEndY = e.changedTouches[0].screenY;
       isTouching = false;
       
-      // Reset visual state
-      const mainContent = document.querySelector('main');
-      if (mainContent) {
-        (mainContent as HTMLElement).style.transform = '';
-        (mainContent as HTMLElement).style.transition = 'transform 0.3s ease-out';
-        
-        setTimeout(() => {
-          (mainContent as HTMLElement).style.transition = '';
-          setIsSwiping(false);
-          setSwipeProgress(0);
-        }, 300);
-      } else {
+      // Reset visual state with smooth animation
+      const containers = document.querySelectorAll('[data-page-container]');
+      containers.forEach((container) => {
+        (container as HTMLElement).style.transform = '';
+        (container as HTMLElement).style.opacity = '1';
+        (container as HTMLElement).style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+      });
+      
+      setTimeout(() => {
+        containers.forEach((container) => {
+          (container as HTMLElement).style.transition = '';
+        });
         setIsSwiping(false);
         setSwipeProgress(0);
-      }
+      }, 300);
       
       handleSwipe();
     };
@@ -119,11 +127,12 @@ export const useSwipeNavigation = () => {
       document.removeEventListener("touchend", handleTouchEnd);
       
       // Clean up any stuck transforms
-      const mainContent = document.querySelector('main');
-      if (mainContent) {
-        (mainContent as HTMLElement).style.transform = '';
-        (mainContent as HTMLElement).style.transition = '';
-      }
+      const containers = document.querySelectorAll('[data-page-container]');
+      containers.forEach((container) => {
+        (container as HTMLElement).style.transform = '';
+        (container as HTMLElement).style.transition = '';
+        (container as HTMLElement).style.opacity = '1';
+      });
     };
   }, [navigate, location.pathname]);
 

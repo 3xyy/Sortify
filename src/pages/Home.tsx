@@ -42,7 +42,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-hero pb-32 animate-fade-in">
+    <div className="min-h-screen gradient-hero pb-32 animate-fade-in" data-page-container>
       {/* Hero Section */}
       <div className="pt-safe px-6 text-center animate-fade-in">
         <div className="pt-4">
