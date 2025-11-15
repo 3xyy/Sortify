@@ -225,19 +225,30 @@ All colors MUST be HSL.
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* Remove hover states on touch devices */
+  /* Remove ALL hover states on touch devices to prevent double-click issue */
   @media (hover: none) and (pointer: coarse) {
-    .hover\:shadow-medium:hover {
-      box-shadow: var(--shadow-soft);
+    * {
+      -webkit-tap-highlight-color: transparent;
     }
-    .hover\:text-foreground:hover {
-      color: inherit;
+    
+    button:hover,
+    a:hover,
+    [role="button"]:hover {
+      background-color: inherit !important;
+      color: inherit !important;
+      transform: none !important;
+      box-shadow: inherit !important;
+      opacity: inherit !important;
     }
-    .hover\:bg-accent\/10:hover {
-      background-color: transparent;
-    }
-    .hover\:scale-105:hover {
-      transform: scale(1);
+    
+    /* Disable all Tailwind hover utilities */
+    [class*="hover:"]:hover {
+      background-color: inherit !important;
+      color: inherit !important;
+      transform: none !important;
+      box-shadow: inherit !important;
+      opacity: inherit !important;
+      border-color: inherit !important;
     }
   }
 }
