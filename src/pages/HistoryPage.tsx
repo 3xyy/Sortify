@@ -9,7 +9,7 @@ import { useSettings } from "@/hooks/useSettings";
 interface ScanItem {
   id: string;
   itemName: string;
-  category: "recycle" | "compost" | "trash" | "hazardous";
+  category: "recycle" | "compost" | "trash" | "hazardous" | "garbage";
   date: string;
   confidence: number;
   thumbnail: string;
@@ -117,6 +117,25 @@ const mockHistory: ScanItem[] = [
       co2Saved: "0.8 kg CO₂ saved by recycling",
     },
   },
+  {
+    id: "6",
+    itemName: "Chip Bag",
+    category: "garbage",
+    date: "5 days ago",
+    confidence: 94,
+    thumbnail: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&h=400&fit=crop",
+    details: {
+      contamination: "Multi-layer packaging detected",
+      instructions: [
+        "Cannot be recycled due to mixed materials",
+        "Empty all contents first",
+        "Place in regular trash bin",
+        "Consider TerraCycle programs for special recycling",
+      ],
+      localRule: "San Francisco does not accept flexible multi-layer packaging in curbside recycling",
+      co2Saved: "Not recyclable - consider reducing usage",
+    },
+  },
 ];
 
 const categoryConfig = {
@@ -139,6 +158,11 @@ const categoryConfig = {
     icon: AlertTriangle,
     label: "Hazardous",
     color: "bg-hazard text-hazard-foreground",
+  },
+  garbage: {
+    icon: Trash2,
+    label: "Landfill",
+    color: "bg-garbage text-garbage-foreground",
   },
 };
 

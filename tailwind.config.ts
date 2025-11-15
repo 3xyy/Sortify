@@ -58,6 +58,10 @@ export default {
           DEFAULT: "hsl(var(--compost))",
           foreground: "hsl(var(--compost-foreground))",
         },
+        garbage: {
+          DEFAULT: "hsl(var(--garbage))",
+          foreground: "hsl(var(--garbage-foreground))",
+        },
         lime: {
           DEFAULT: "hsl(var(--lime))",
           foreground: "hsl(var(--lime-foreground))",
