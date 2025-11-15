@@ -249,11 +249,11 @@ const SettingsPage = () => {
                 <p className="text-muted-foreground">
                   2. Test it here to verify it works
                 </p>
-                <p className="text-muted-foreground">
-                  3. The OPENAI_API_KEY secret must be configured in your backend for the app to work
-                </p>
                 <p className="text-muted-foreground mt-2 font-medium text-warning">
-                  ⚠️ Note: This test validates your key, but the actual app uses the backend secret configuration.
+                  ⚠️ This tester validates your key format and permissions. The actual app requires configuring the OPENAI_API_KEY as a backend secret (already done for you).
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  If scans are failing, the backend secret may need to be updated with your working key.
                 </p>
               </div>
             </div>
