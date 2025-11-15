@@ -36,51 +36,39 @@ const SettingsPage = () => {
             </div>
             
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="confidence" className="flex-1 cursor-pointer">
+              <div className="flex items-center justify-between opacity-50">
+                <Label htmlFor="confidence" className="flex-1">
                   <div className="font-medium">Show Confidence Scores</div>
-                  <div className="text-sm text-muted-foreground">Display AI confidence %</div>
+                  <div className="text-sm text-muted-foreground">Display AI confidence % (Required)</div>
                 </Label>
                 <Switch 
                   id="confidence"
-                  checked={settings.showConfidence}
-                  onCheckedChange={(val) => {
-                    updateSetting("showConfidence", val);
-                    triggerHaptic("light");
-                    toast.success(val ? "Confidence scores enabled" : "Confidence scores disabled");
-                  }}
+                  checked={true}
+                  disabled
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="contamination" className="flex-1 cursor-pointer">
+              <div className="flex items-center justify-between opacity-50">
+                <Label htmlFor="contamination" className="flex-1">
                   <div className="font-medium">Contamination Warnings</div>
-                  <div className="text-sm text-muted-foreground">Alert about dirty items</div>
+                  <div className="text-sm text-muted-foreground">Alert about dirty items (Required)</div>
                 </Label>
                 <Switch 
                   id="contamination"
-                  checked={settings.showContamination}
-                  onCheckedChange={(val) => {
-                    updateSetting("showContamination", val);
-                    triggerHaptic("light");
-                    toast.success(val ? "Contamination warnings enabled" : "Contamination warnings disabled");
-                  }}
+                  checked={true}
+                  disabled
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="co2" className="flex-1 cursor-pointer">
+              <div className="flex items-center justify-between opacity-50">
+                <Label htmlFor="co2" className="flex-1">
                   <div className="font-medium">CO₂ Reduction Estimates</div>
-                  <div className="text-sm text-muted-foreground">Show environmental impact</div>
+                  <div className="text-sm text-muted-foreground">Show environmental impact (Required)</div>
                 </Label>
                 <Switch 
                   id="co2"
-                  checked={settings.showCO2}
-                  onCheckedChange={(val) => {
-                    updateSetting("showCO2", val);
-                    triggerHaptic("light");
-                    toast.success(val ? "CO₂ estimates enabled" : "CO₂ estimates disabled");
-                  }}
+                  checked={true}
+                  disabled
                 />
               </div>
 
@@ -91,9 +79,9 @@ const SettingsPage = () => {
                 </Label>
                 <Switch 
                   id="haptics"
-                  checked={settings.haptics}
+                  checked={settings.enableHaptics}
                   onCheckedChange={(val) => {
-                    updateSetting("haptics", val);
+                    updateSetting("enableHaptics", val);
                     if (val && "vibrate" in navigator) {
                       navigator.vibrate([10, 50, 10]);
                       toast.success("Haptics enabled");

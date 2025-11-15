@@ -25,7 +25,7 @@ export const useSwipeNavigation = () => {
     };
 
     const handleSwipe = () => {
-      const swipeThreshold = 50; // More sensitive
+      const swipeThreshold = 50;
       const verticalThreshold = 100;
       const diffX = touchStartX - touchEndX;
       const diffY = Math.abs(touchStartY - touchEndY);
@@ -38,8 +38,12 @@ export const useSwipeNavigation = () => {
       if (currentIndex === -1) return;
 
       // Add haptic feedback
-      if ('vibrate' in navigator) {
-        navigator.vibrate(10);
+      if ('vibrate' in navigator && navigator.vibrate) {
+        try {
+          navigator.vibrate([15, 10, 15]);
+        } catch (e) {
+          console.log("Haptic feedback not supported:", e);
+        }
       }
 
       if (diffX > 0 && currentIndex < routes.length - 1) {

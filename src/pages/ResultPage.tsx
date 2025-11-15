@@ -192,10 +192,10 @@ const ResultPage = () => {
               variant="outline" 
               className="w-full" 
               size="xl"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/articles")}
             >
-              <Camera className="h-5 w-5" />
-              Scan Another Item
+              <Icon className="h-5 w-5" />
+              Go To Article
             </Button>
           </div>
         </div>
