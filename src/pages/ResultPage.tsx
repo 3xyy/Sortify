@@ -164,7 +164,7 @@ const ResultPage = () => {
 
       } catch (error) {
         console.error('Failed to analyze image:', error);
-        toast.error("Failed to analyze image. Please try again.");
+        toast.error("Failed to analyze image. Please check your API key configuration in Settings.");
         // Use mock data as fallback
         setResult(mockResult);
       } finally {
