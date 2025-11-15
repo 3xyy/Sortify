@@ -205,6 +205,10 @@ const ResultPage = () => {
       {showChat && (
         <ChatInterface 
           itemName={result.itemName}
+          category={result.category}
+          categoryLabel={config.label}
+          instructions={result.instructions}
+          co2Saved={result.co2Saved}
           onClose={() => setShowChat(false)}
         />
       )}
