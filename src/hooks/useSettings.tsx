@@ -81,12 +81,16 @@ export const useSettings = () => {
     if (!settings.haptics) return;
     
     if ("vibrate" in navigator) {
-      const patterns = {
-        light: [10],
-        medium: [20],
-        heavy: [30],
-      };
-      navigator.vibrate(patterns[style]);
+      try {
+        const patterns = {
+          light: [10],
+          medium: [15, 10, 15],
+          heavy: [25, 10, 25],
+        };
+        navigator.vibrate(patterns[style]);
+      } catch (e) {
+        console.log("Haptic feedback not supported on this device");
+      }
     }
   };
 

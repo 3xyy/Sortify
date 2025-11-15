@@ -42,7 +42,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-hero pb-32">
+    <div className="min-h-screen gradient-hero pb-32 animate-fade-in">
       {/* Hero Section */}
       <div className="pt-safe px-6 text-center animate-fade-in">
         <div className="pt-16">
@@ -81,7 +81,7 @@ const Home = () => {
             </div>
           </Card>
 
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+          <Card className="p-6 shadow-soft active:shadow-medium transition-smooth cursor-pointer active:scale-[0.98]" onClick={() => {
             triggerHaptic("light");
             navigate("/history");
           }}>
@@ -96,7 +96,7 @@ const Home = () => {
             </div>
           </Card>
 
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+          <Card className="p-6 shadow-soft active:shadow-medium transition-smooth cursor-pointer active:scale-[0.98]" onClick={() => {
             triggerHaptic("light");
             navigate("/articles");
           }}>
@@ -111,7 +111,7 @@ const Home = () => {
             </div>
           </Card>
 
-          <Card className="p-6 shadow-soft hover:shadow-medium transition-smooth cursor-pointer" onClick={() => {
+          <Card className="p-6 shadow-soft active:shadow-medium transition-smooth cursor-pointer active:scale-[0.98]" onClick={() => {
             triggerHaptic("light");
             navigate("/settings");
           }}>
@@ -130,7 +130,7 @@ const Home = () => {
 
       {/* Stats Section */}
       <div className="px-6 mt-12 animate-fade-up" style={{ animationDelay: "0.2s" }}>
-        <Card className="p-6 shadow-soft bg-gradient-subtle">
+        <Card className="p-6 shadow-soft bg-gradient-subtle mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
             <h2 className="font-semibold">Your Impact</h2>

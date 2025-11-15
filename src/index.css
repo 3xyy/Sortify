@@ -212,4 +212,20 @@ All colors MUST be HSL.
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  /* Remove hover states on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:shadow-medium:hover {
+      box-shadow: var(--shadow-soft);
+    }
+    .hover\:text-foreground:hover {
+      color: inherit;
+    }
+    .hover\:bg-accent\/10:hover {
+      background-color: transparent;
+    }
+    .hover\:scale-105:hover {
+      transform: scale(1);
+    }
+  }
 }
