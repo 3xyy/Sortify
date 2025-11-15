@@ -10,12 +10,39 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { toast } from "sonner";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useState, useEffect } from "react";
 
 const SettingsPage = () => {
   const { settings, updateSetting, triggerHaptic } = useSettings();
   const { theme, setTheme } = useTheme();
   const { isDemoMode, enterDemoMode, exitDemoMode } = useDemoMode();
+  const [visionApiStatus, setVisionApiStatus] = useState<"checking" | "connected" | "disconnected">("checking");
   useSwipeNavigation();
+
+  useEffect(() => {
+    const checkVisionApi = async () => {
+      const apiKey = import.meta.env.VITE_VISION_API_KEY;
+      if (!apiKey || apiKey === "your_vision_api_key_here") {
+        setVisionApiStatus("disconnected");
+        return;
+      }
+
+      try {
+        // Make a simple test request to validate the API key
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/models", {
+          headers: {
+            "Authorization": `Bearer ${apiKey}`
+          }
+        });
+        
+        setVisionApiStatus(response.ok ? "connected" : "disconnected");
+      } catch {
+        setVisionApiStatus("disconnected");
+      }
+    };
+
+    checkVisionApi();
+  }, []);
 
   return (
     <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in" data-page-container>
@@ -243,8 +270,7 @@ const SettingsPage = () => {
               <h2 className="font-semibold text-sm">API Status</h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Vision API: Connected<br />
-              Chat API: Connected
+              Vision API: {visionApiStatus === "checking" ? "Checking..." : visionApiStatus === "connected" ? "Connected" : "Disconnected"}
             </p>
           </Card>
           <div className="h-8" />
