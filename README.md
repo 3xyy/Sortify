@@ -483,8 +483,8 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
 #### Setup
 ```bash
 # Clone the repository
-git clone 
-cd sortify-ai
+git clone git@github.com:3xyy/Sortify.git
+cd Sortify
 
 # Install dependencies
 npm install
