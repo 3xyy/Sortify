@@ -11,6 +11,7 @@ import { useDemoMode } from "@/contexts/DemoContext";
 import { toast } from "sonner";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const SettingsPage = () => {
   const { settings, updateSetting, triggerHaptic } = useSettings();
@@ -22,27 +23,31 @@ const SettingsPage = () => {
 
   const checkVisionApi = async () => {
     setVisionApiStatus("checking");
-    console.log("=== API STATUS CHECK STARTED ===");
-    console.log("Endpoint:", `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`);
-    console.log("Method: OPTIONS");
-    console.log("Headers:", {
-      'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
-    });
+    console.log("=== API STATUS CHECK STARTED (Testing OpenAI) ===");
     
     try {
-      // Test if the backend edge function is accessible
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`, {
-        method: 'OPTIONS',
-        headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
+      // Make a minimal test request to validate the OpenAI API key works
+      const testImageData = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
+      const response = await supabase.functions.invoke('analyze-waste', {
+        body: { 
+          imageData: testImageData,
+          city: 'Test'
         }
       });
       
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
+      console.log("Test response:", response);
+      console.log("Response data:", response.data);
+      console.log("Response error:", response.error);
+      
+      // Consider it connected if we get any response (even if it's an error about the image)
+      // As long as the API key is working and the function is accessible
+      const isConnected = !response.error || 
+        (response.error && !response.error.message.includes('API key'));
+      
+      console.log("Is connected:", isConnected);
       console.log("=== API STATUS CHECK COMPLETED ===");
       
-      setVisionApiStatus(response.ok ? "connected" : "disconnected");
+      setVisionApiStatus(isConnected ? "connected" : "disconnected");
     } catch (error) {
       console.error("=== API STATUS CHECK FAILED ===");
       console.error("Error:", error);
@@ -322,7 +327,7 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 11.15.25.23.33
+              <span className="font-medium">App Version:</span> 11.16.00.11
             </div>
             <div>
               Made with ❤️ by <a 
