@@ -166,7 +166,7 @@ Sortify AI transforms recycling from a confusing chore into an intuitive, educat
 ### Backend Integration
 - **Lovable Cloud (Supabase):** Serverless backend infrastructure
 - **Edge Functions:** Serverless compute for AI processing
-- **OpenAI GPT-4 Vision API:** Advanced image analysis
+- **OpenAI GPT-5.1 Vision API:** Advanced image analysis
 - **CORS-Enabled API:** Secure cross-origin requests
 
 ### State Management Strategy
@@ -205,7 +205,7 @@ Sortify AI transforms recycling from a confusing chore into an intuitive, educat
 
 3. **AI Analysis (Edge Function)**
    - **Function:** `analyze-waste`
-   - **Model:** OpenAI GPT-4 Vision with 4000 token output limit
+   - **Model:** OpenAI GPT-5.1 Vision with 4000 token output limit
    - **System Prompt:** 224-line expert waste-sorting instruction set
    - **Input:** Base64 image + selected city
    - **Output:** Structured JSON with 10 fields
@@ -300,7 +300,7 @@ Sortify AI transforms recycling from a confusing chore into an intuitive, educat
 ## 🤖 AI Integration
 
 ### OpenAI Vision API Configuration
-- **Model:** GPT-4 Vision (latest)
+- **Model:** GPT-5.1 Vision (latest)
 - **Max Tokens:** 4000 (completion limit)
 - **Temperature:** Not specified (defaults to 1.0)
 - **Image Format:** Base64-encoded JPEG/PNG
@@ -549,7 +549,7 @@ sortify-ai/
 
 ### Backend & AI
 - **Supabase 2.81.1** - Backend-as-a-Service (Lovable Cloud)
-- **OpenAI API** - GPT-4 Vision for image analysis
+- **OpenAI API** - GPT-5.1 Vision for image analysis
 - **Deno** - Edge function runtime
 
 ### PWA & Performance
@@ -645,7 +645,7 @@ This project is built with [Lovable](https://lovable.dev) and uses:
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** - GPT-4 Vision API
+- **OpenAI** - GPT-5.1 Vision API
 - **Lovable** - Development platform and cloud infrastructure
 - **shadcn** - Beautiful component library
 - **Radix UI** - Accessible primitives
