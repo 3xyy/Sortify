@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSettings } from "@/hooks/useSettings";
+import { useState, useEffect } from "react";
 
 interface ScanItem {
   id: string;
@@ -170,7 +171,33 @@ const HistoryPage = () => {
   const navigate = useNavigate();
   const { isDemoMode } = useDemoMode();
   const { triggerHaptic } = useSettings();
+  const [localHistory, setLocalHistory] = useState<ScanItem[]>([]);
   useSwipeNavigation();
+  
+  useEffect(() => {
+    if (!isDemoMode) {
+      const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+      const formattedHistory = history.map((item: any) => ({
+        ...item,
+        date: formatDate(item.date)
+      }));
+      setLocalHistory(formattedHistory);
+    }
+  }, [isDemoMode]);
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <div className="min-h-screen gradient-hero pb-32 pt-safe animate-fade-in" data-page-container>
@@ -183,16 +210,8 @@ const HistoryPage = () => {
         </div>
 
       <div className="space-y-3 animate-fade-up">
-        {!isDemoMode ? (
-          <Card className="p-8 text-center shadow-soft">
-            <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="font-semibold mb-2">No Scan History</h3>
-            <p className="text-sm text-muted-foreground">
-              Start scanning items to see your history here
-            </p>
-          </Card>
-        ) : (
-          mockHistory.map((item, index) => {
+        {(isDemoMode ? mockHistory : localHistory).length > 0 ? (
+          (isDemoMode ? mockHistory : localHistory).map((item, index) => {
             const config = categoryConfig[item.category];
             const Icon = config.icon;
             
@@ -235,11 +254,19 @@ const HistoryPage = () => {
           </Card>
         );
       })
+        ) : (
+          <Card className="p-8 text-center shadow-soft">
+            <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-semibold mb-2">No Scan History</h3>
+            <p className="text-sm text-muted-foreground">
+              Start scanning items to see your history here
+            </p>
+          </Card>
         )}
           <div className="h-8" />
         </div>
 
-        {mockHistory.length === 0 && (
+        {(isDemoMode ? mockHistory : localHistory).length === 0 && (
           <div className="text-center py-16">
             <History className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No scans yet</h3>

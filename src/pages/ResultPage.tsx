@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft, Loader2 } from "lucide-react";
+import { Recycle, Trash2, Leaf, AlertTriangle, MessageCircle, Camera, MapPin, Info, ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ChatInterface } from "@/components/ChatInterface";
@@ -69,6 +69,7 @@ const ResultPage = () => {
   const [result, setResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentTip, setCurrentTip] = useState(0);
+  const [progress, setProgress] = useState(0);
   const { settings } = useSettings();
 
   const tips = [
@@ -109,6 +110,7 @@ const ResultPage = () => {
       }
 
       setIsAnalyzing(true);
+      setProgress(0);
       
       try {
         // Convert file to base64
@@ -203,11 +205,34 @@ const ResultPage = () => {
         // Create object URL for the image
         const imageUrl = URL.createObjectURL(file);
         
+        // Save to localStorage
+        const scanItem = {
+          id: Date.now().toString(),
+          itemName: data.itemName,
+          category: data.category,
+          date: new Date().toISOString(),
+          confidence: data.confidence,
+          thumbnail: imageUrl,
+          materialType: data.materialType,
+          details: {
+            contamination: data.contamination,
+            instructions: data.instructions,
+            localRule: data.localRule,
+            co2Saved: data.co2Saved
+          }
+        };
+        
+        const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+        history.unshift(scanItem);
+        localStorage.setItem('scanHistory', JSON.stringify(history));
+        
         // Set the result with the image URL
         setResult({
           ...data,
           imageUrl
         });
+        
+        toast.success("Scan saved to history");
 
       } catch (error) {
         console.error('Failed to analyze image:', error);
@@ -232,6 +257,34 @@ const ResultPage = () => {
     analyzeImage();
   }, [state, navigate, settings.selectedCity]);
 
+  // Simulate progress during analysis
+  useEffect(() => {
+    if (!isAnalyzing) return;
+    
+    const progressSteps = [
+      { value: 20, delay: 300 },
+      { value: 40, delay: 600 },
+      { value: 60, delay: 900 },
+      { value: 75, delay: 1200 },
+      { value: 90, delay: 1800 }
+    ];
+    
+    const timers = progressSteps.map(({ value, delay }) => 
+      setTimeout(() => setProgress(value), delay)
+    );
+    
+    return () => timers.forEach(clearTimeout);
+  }, [isAnalyzing]);
+  
+  // Complete progress when analysis is done
+  useEffect(() => {
+    if (!isAnalyzing && progress > 0) {
+      setProgress(100);
+      const timer = setTimeout(() => setProgress(0), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnalyzing, progress]);
+
   // Cycle tips during loading
   useEffect(() => {
     if (!isAnalyzing) return;
@@ -246,16 +299,35 @@ const ResultPage = () => {
   // Show loading state while analyzing
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen gradient-hero flex items-center justify-center" data-analyzing="true">
-        <div className="text-center space-y-6 px-6 max-w-md">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <h2 className="text-2xl font-bold">Analyzing Your Item</h2>
-          <p className="text-muted-foreground">Our AI is identifying the best way to dispose of this item...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6" data-analyzing="true">
+        <div className="text-center space-y-8 max-w-md animate-fade-in">
+          <div className="relative">
+            <div className="h-24 w-24 mx-auto">
+              <Loader2 className="h-24 w-24 text-primary animate-spin" />
+            </div>
+          </div>
           
-          <div className="mt-8 p-4 bg-accent/10 rounded-lg border border-accent/20">
-            <p className="text-sm text-foreground animate-fade-in" key={currentTip}>
-              💡 {tips[currentTip]}
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold">Analyzing Your Item</h2>
+            <p className="text-muted-foreground">
+              Our AI is identifying the material and checking local recycling rules...
             </p>
+          </div>
+
+          <div className="w-full space-y-3">
+            <Progress value={progress} className="h-2" />
+            <p className="text-sm text-muted-foreground">
+              {progress}% complete
+            </p>
+          </div>
+
+          <div className="bg-primary/10 rounded-xl p-6 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+              <p className="text-sm leading-relaxed text-left">
+                {tips[currentTip]}
+              </p>
+            </div>
           </div>
         </div>
       </div>
