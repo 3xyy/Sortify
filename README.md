@@ -1,6 +1,3 @@
-
----
-
 # 🌱 Sortify AI - Smart Recycling Scanner
 
 **Version:** 11.16.25.16.48
