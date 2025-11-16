@@ -306,7 +306,7 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 11.15.25.16.30
+              <span className="font-medium">App Version:</span> 11.15.25.16.48
             </div>
             <div>
               Made with ❤️ by{" "}
