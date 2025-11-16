@@ -24,29 +24,29 @@ const SettingsPage = () => {
   const checkVisionApi = async () => {
     setVisionApiStatus("checking");
     console.log("=== API STATUS CHECK STARTED (Testing OpenAI) ===");
-    
+
     try {
       // Make a minimal test request to validate the OpenAI API key works
-      const testImageData = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
-      const response = await supabase.functions.invoke('analyze-waste', {
-        body: { 
+      const testImageData =
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
+      const response = await supabase.functions.invoke("analyze-waste", {
+        body: {
           imageData: testImageData,
-          city: 'Test'
-        }
+          city: "Test",
+        },
       });
-      
+
       console.log("Test response:", response);
       console.log("Response data:", response.data);
       console.log("Response error:", response.error);
-      
+
       // Consider it connected if we get any response (even if it's an error about the image)
       // As long as the API key is working and the function is accessible
-      const isConnected = !response.error || 
-        (response.error && !response.error.message.includes('API key'));
-      
+      const isConnected = !response.error || (response.error && !response.error.message.includes("API key"));
+
       console.log("Is connected:", isConnected);
       console.log("=== API STATUS CHECK COMPLETED ===");
-      
+
       setVisionApiStatus(isConnected ? "connected" : "disconnected");
     } catch (error) {
       console.error("=== API STATUS CHECK FAILED ===");
@@ -58,7 +58,7 @@ const SettingsPage = () => {
   const handleRetry = () => {
     checkVisionApi();
     setCooldownSeconds(10);
-    
+
     const interval = setInterval(() => {
       setCooldownSeconds((prev) => {
         if (prev <= 1) {
@@ -91,18 +91,14 @@ const SettingsPage = () => {
               <Gauge className="h-4 w-4 text-primary" />
               <h2 className="font-semibold">Features</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between opacity-50">
                 <Label htmlFor="confidence" className="flex-1">
                   <div className="font-medium">Show Confidence Scores</div>
                   <div className="text-sm text-muted-foreground">Display AI confidence % (Required)</div>
                 </Label>
-                <Switch 
-                  id="confidence"
-                  checked={true}
-                  disabled
-                />
+                <Switch id="confidence" checked={true} disabled />
               </div>
 
               <div className="flex items-center justify-between opacity-50">
@@ -110,11 +106,7 @@ const SettingsPage = () => {
                   <div className="font-medium">Contamination Warnings</div>
                   <div className="text-sm text-muted-foreground">Alert about dirty items (Required)</div>
                 </Label>
-                <Switch 
-                  id="contamination"
-                  checked={true}
-                  disabled
-                />
+                <Switch id="contamination" checked={true} disabled />
               </div>
 
               <div className="flex items-center justify-between opacity-50">
@@ -122,11 +114,7 @@ const SettingsPage = () => {
                   <div className="font-medium">CO₂ Reduction Estimates</div>
                   <div className="text-sm text-muted-foreground">Show environmental impact (Required)</div>
                 </Label>
-                <Switch 
-                  id="co2"
-                  checked={true}
-                  disabled
-                />
+                <Switch id="co2" checked={true} disabled />
               </div>
 
               <div className="flex items-center justify-between">
@@ -134,7 +122,7 @@ const SettingsPage = () => {
                   <div className="font-medium">Enable Haptics</div>
                   <div className="text-sm text-muted-foreground">Vibration feedback</div>
                 </Label>
-                <Switch 
+                <Switch
                   id="haptics"
                   checked={settings.enableHaptics}
                   onCheckedChange={(val) => {
@@ -157,11 +145,11 @@ const SettingsPage = () => {
               <MapPin className="h-4 w-4 text-primary" />
               <h2 className="font-semibold">Location</h2>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="city">Your City</Label>
-              <Select 
-                value={settings.selectedCity} 
+              <Select
+                value={settings.selectedCity}
                 onValueChange={(val) => {
                   updateSetting("selectedCity", val);
                   triggerHaptic("light");
@@ -180,9 +168,7 @@ const SettingsPage = () => {
                   <SelectItem value="boston">Boston, MA</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Recycling rules vary by location
-              </p>
+              <p className="text-xs text-muted-foreground">Recycling rules vary by location</p>
             </div>
           </Card>
 
@@ -192,11 +178,11 @@ const SettingsPage = () => {
               <Palette className="h-4 w-4 text-primary" />
               <h2 className="font-semibold">Appearance</h2>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="theme">Theme</Label>
-              <Select 
-                value={theme} 
+              <Select
+                value={theme}
                 onValueChange={(val) => {
                   setTheme(val as "light" | "dark" | "auto");
                   triggerHaptic("light");
@@ -247,9 +233,7 @@ const SettingsPage = () => {
                   className="flex-1 h-12 font-mono uppercase"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Customize the app's primary color
-              </p>
+              <p className="text-xs text-muted-foreground">Customize the app's primary color</p>
             </div>
           </Card>
 
@@ -259,14 +243,12 @@ const SettingsPage = () => {
               <TestTube className="h-4 w-4 text-accent" />
               <h2 className="font-semibold">Demo Mode</h2>
             </div>
-            
-            <p className="text-sm text-muted-foreground mb-4">
-              Explore the app with sample scan data
-            </p>
-            
+
+            <p className="text-sm text-muted-foreground mb-4">Explore the app with sample scan data</p>
+
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={() => {
                   enterDemoMode();
@@ -278,8 +260,8 @@ const SettingsPage = () => {
                 {isDemoMode ? "Demo Active" : "Open Demo"}
               </Button>
               {isDemoMode && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => {
                     exitDemoMode();
@@ -300,25 +282,22 @@ const SettingsPage = () => {
                 <Zap className="h-4 w-4 text-primary" />
                 <span className="font-semibold">API Status</span>
               </div>
-              <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                visionApiStatus === "connected" 
-                  ? "bg-success/10 text-success" 
-                  : visionApiStatus === "checking"
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-destructive/10 text-destructive"
-              }`}>
+              <div
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  visionApiStatus === "connected"
+                    ? "bg-success/10 text-success"
+                    : visionApiStatus === "checking"
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-destructive/10 text-destructive"
+                }`}
+              >
                 {visionApiStatus === "connected" && "✓ Connected"}
                 {visionApiStatus === "checking" && "Checking..."}
                 {visionApiStatus === "disconnected" && "✗ Not Connected"}
               </div>
             </div>
             {visionApiStatus === "disconnected" && (
-              <Button
-                onClick={handleRetry}
-                disabled={cooldownSeconds > 0}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={handleRetry} disabled={cooldownSeconds > 0} variant="outline" className="w-full">
                 {cooldownSeconds > 0 ? `Try Again (${cooldownSeconds}s)` : "Try Again"}
               </Button>
             )}
@@ -327,12 +306,13 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 11.16.00.28
+              <span className="font-medium">App Version:</span> 11.15.25.16.30
             </div>
             <div>
-              Made with ❤️ by <a 
-                href="https://www.linkedin.com/in/yuvrajdar/" 
-                target="_blank" 
+              Made with ❤️ by{" "}
+              <a
+                href="https://www.linkedin.com/in/yuvrajdar/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline font-medium"
               >
