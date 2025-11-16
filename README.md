@@ -578,10 +578,10 @@ sortify-ai/
 - **Total Components:** 60+ (including shadcn/ui)
 - **Total Dependencies:** 60+
 - **Lines of Code:** ~5,000+ (estimated, excluding node_modules)
-- **Supported Cities:** 25+
+- **Supported Cities:** 6 (for now)
 - **Educational Articles:** 10+ topics
 - **Waste Categories:** 4 primary, 1 general
-- **PWA Score:** Lighthouse 90+ (optimized for PWA best practices)
+- **PWA Score:** Lighthouse 95-100 (optimized for PWA best practices)
 
 ---
 
