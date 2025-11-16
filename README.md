@@ -11,7 +11,7 @@ An AI-powered Progressive Web App (PWA) that helps users make better recycling d
 
 ## 📋 Table of Contents
 
-- [Overview](##overview)
+- [Overview](#overview)
 - [Key Features](#key-features)
 - [Progressive Web App (PWA) Capabilities](#progressive-web-app-pwa-capabilities)
 - [Technical Architecture](#technical-architecture)
