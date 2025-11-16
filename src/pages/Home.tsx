@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDemoMode } from "@/contexts/DemoContext";
 import { useSettings } from "@/hooks/useSettings";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -15,7 +15,29 @@ const Home = () => {
   const { isDemoMode, exitDemoMode } = useDemoMode();
   const { triggerHaptic } = useSettings();
   const [showScanOptions, setShowScanOptions] = useState(false);
+  const [stats, setStats] = useState({ totalScans: 0, recycled: 0, co2Saved: '0.0' });
   useSwipeNavigation();
+  
+  useEffect(() => {
+    if (!isDemoMode) {
+      const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+      const totalScans = history.length;
+      const recycled = history.filter((scan: any) => 
+        ['recycle', 'compost'].includes(scan.category)
+      ).length;
+      
+      const totalCo2 = history.reduce((sum: number, scan: any) => {
+        const match = scan.details?.co2Saved?.match(/[\d.]+/);
+        return sum + (match ? parseFloat(match[0]) : 0);
+      }, 0);
+      
+      setStats({
+        totalScans,
+        recycled,
+        co2Saved: totalCo2.toFixed(1)
+      });
+    }
+  }, [isDemoMode]);
 
   const handleScan = (file: File, type: "camera" | "upload") => {
     triggerHaptic("medium");
@@ -137,15 +159,15 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{isDemoMode ? "47" : "0"}</div>
+              <div className="text-2xl font-bold text-primary">{isDemoMode ? "47" : stats.totalScans}</div>
               <div className="text-xs text-muted-foreground">Items Scanned</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-success">{isDemoMode ? "38" : "0"}</div>
+              <div className="text-2xl font-bold text-success">{isDemoMode ? "38" : stats.recycled}</div>
               <div className="text-xs text-muted-foreground">Recycled</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-accent">{isDemoMode ? "12kg" : "0kg"}</div>
+              <div className="text-2xl font-bold text-accent">{isDemoMode ? "12kg" : `${stats.co2Saved}kg`}</div>
               <div className="text-xs text-muted-foreground">CO₂ Saved</div>
             </div>
           </div>
