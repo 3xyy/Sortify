@@ -2,43 +2,43 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { imageData, city } = await req.json();
-    console.log('=== ANALYZE WASTE FUNCTION STARTED ===');
-    console.log('City:', city);
-    console.log('Image data length:', imageData?.length);
-    console.log('Image data type:', typeof imageData);
-    console.log('Image data preview:', imageData?.substring(0, 50));
+    console.log("=== ANALYZE WASTE FUNCTION STARTED ===");
+    console.log("City:", city);
+    console.log("Image data length:", imageData?.length);
+    console.log("Image data type:", typeof imageData);
+    console.log("Image data preview:", imageData?.substring(0, 50));
 
     if (!imageData) {
-      console.error('ERROR: No image data provided');
-      throw new Error('No image data provided');
+      console.error("ERROR: No image data provided");
+      throw new Error("No image data provided");
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    console.log('API Key present:', !!openAIApiKey);
-    console.log('API Key length:', openAIApiKey?.length);
-    
+    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
+    console.log("API Key present:", !!openAIApiKey);
+    console.log("API Key length:", openAIApiKey?.length);
+
     if (!openAIApiKey) {
-      console.error('ERROR: OPENAI_API_KEY not configured');
-      throw new Error('OPENAI_API_KEY not configured');
+      console.error("ERROR: OPENAI_API_KEY not configured");
+      throw new Error("OPENAI_API_KEY not configured");
     }
 
     // Prepare the image URL (handle both base64 and URLs)
     let imageUrl = imageData;
-    if (!imageData.startsWith('http')) {
+    if (!imageData.startsWith("http")) {
       // It's base64, ensure it has the proper data URI prefix
-      if (!imageData.startsWith('data:')) {
+      if (!imageData.startsWith("data:")) {
         imageUrl = `data:image/jpeg;base64,${imageData}`;
       }
     }
@@ -98,126 +98,125 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
 
     const userPrompt = `Analyze this waste item for disposal in ${city}. Return ONLY the JSON object as specified.`;
 
-    console.log('=== CALLING OPENAI API ===');
-    console.log('Model: gpt-5-2025-08-07');
-    console.log('System prompt length:', systemPrompt.length);
-    console.log('User prompt:', userPrompt);
-    console.log('Image URL type:', imageUrl.startsWith('data:') ? 'base64' : 'url');
-    
+    console.log("=== CALLING OPENAI API ===");
+    console.log("Model: gpt-5-2025-08-07");
+    console.log("System prompt length:", systemPrompt.length);
+    console.log("User prompt:", userPrompt);
+    console.log("Image URL type:", imageUrl.startsWith("data:") ? "base64" : "url");
+
     const requestBody = {
-      model: 'gpt-5-2025-08-07',
+      model: "gpt-5-2025-08-07",
       messages: [
-        { 
-          role: 'system', 
-          content: systemPrompt
+        {
+          role: "system",
+          content: systemPrompt,
         },
-        { 
-          role: 'user',
+        {
+          role: "user",
           content: [
             {
-              type: 'text',
-              text: userPrompt
+              type: "text",
+              text: userPrompt,
             },
             {
-              type: 'image_url',
+              type: "image_url",
               image_url: {
-                url: imageUrl
-              }
-            }
-          ]
-        }
+                url: imageUrl,
+              },
+            },
+          ],
+        },
       ],
       max_completion_tokens: 4000,
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
     };
-    
-    console.log('Request body prepared, messages count:', requestBody.messages.length);
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+
+    console.log("Request body prepared, messages count:", requestBody.messages.length);
+
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${openAIApiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
-    
-    console.log('=== OPENAI RESPONSE ===');
-    console.log('Status:', response.status);
-    console.log('Status text:', response.statusText);
-    console.log('Headers:', Object.fromEntries(response.headers.entries()));
+
+    console.log("=== OPENAI RESPONSE ===");
+    console.log("Status:", response.status);
+    console.log("Status text:", response.statusText);
+    console.log("Headers:", Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('=== OPENAI API ERROR ===');
-      console.error('Status:', response.status);
-      console.error('Error text:', errorText);
-      
+      console.error("=== OPENAI API ERROR ===");
+      console.error("Status:", response.status);
+      console.error("Error text:", errorText);
+
       // Try to parse error as JSON for more details
       try {
         const errorJson = JSON.parse(errorText);
-        console.error('Error details:', JSON.stringify(errorJson, null, 2));
+        console.error("Error details:", JSON.stringify(errorJson, null, 2));
       } catch (e) {
-        console.error('Could not parse error as JSON');
+        console.error("Could not parse error as JSON");
       }
-      
+
       throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('=== OPENAI RESPONSE DATA ===');
-    console.log('Full response:', JSON.stringify(data, null, 2));
-    console.log('Choices count:', data.choices?.length);
-    
+    console.log("=== OPENAI RESPONSE DATA ===");
+    console.log("Full response:", JSON.stringify(data, null, 2));
+    console.log("Choices count:", data.choices?.length);
+
     const aiResponse = data.choices?.[0]?.message?.content;
-    console.log('=== AI RESPONSE CONTENT ===');
-    console.log('Content type:', typeof aiResponse);
-    console.log('Content length:', aiResponse?.length);
-    console.log('Content preview:', aiResponse?.substring(0, 200));
-    console.log('Full content:', aiResponse);
-    
+    console.log("=== AI RESPONSE CONTENT ===");
+    console.log("Content type:", typeof aiResponse);
+    console.log("Content length:", aiResponse?.length);
+    console.log("Content preview:", aiResponse?.substring(0, 200));
+    console.log("Full content:", aiResponse);
+
     if (!aiResponse) {
-      console.error('=== EMPTY AI RESPONSE ===');
-      console.error('Full data object:', JSON.stringify(data, null, 2));
-      throw new Error('Empty response from AI. Please check your API key and try again.');
+      console.error("=== EMPTY AI RESPONSE ===");
+      console.error("Full data object:", JSON.stringify(data, null, 2));
+      throw new Error("Empty response from AI. Please check your API key and try again.");
     }
-    
+
     // Parse the JSON response
     let analysisResult;
     try {
-      console.log('=== PARSING JSON ===');
+      console.log("=== PARSING JSON ===");
       analysisResult = JSON.parse(aiResponse);
-      console.log('Parsed successfully:', JSON.stringify(analysisResult, null, 2));
+      console.log("Parsed successfully:", JSON.stringify(analysisResult, null, 2));
     } catch (e) {
-      console.error('=== JSON PARSE ERROR ===');
-      console.error('Error:', e);
-      console.error('Raw response to parse:', aiResponse);
+      console.error("=== JSON PARSE ERROR ===");
+      console.error("Error:", e);
+      console.error("Raw response to parse:", aiResponse);
       const errorMsg = e instanceof Error ? e.message : String(e);
       throw new Error(`Invalid JSON response from AI: ${errorMsg}`);
     }
 
-    console.log('=== SUCCESS ===');
-    console.log('Returning result:', JSON.stringify(analysisResult, null, 2));
-    
-    return new Response(JSON.stringify(analysisResult), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.log("=== SUCCESS ===");
+    console.log("Returning result:", JSON.stringify(analysisResult, null, 2));
 
+    return new Response(JSON.stringify(analysisResult), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error('=== FUNCTION ERROR ===');
-    console.error('Error type:', error instanceof Error ? 'Error' : typeof error);
-    console.error('Error message:', error instanceof Error ? error.message : String(error));
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
-    
+    console.error("=== FUNCTION ERROR ===");
+    console.error("Error type:", error instanceof Error ? "Error" : typeof error);
+    console.error("Error message:", error instanceof Error ? error.message : String(error));
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: error instanceof Error ? error.stack : String(error)
-      }), 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        details: error instanceof Error ? error.stack : String(error),
+      }),
       {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 });
