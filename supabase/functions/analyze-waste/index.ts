@@ -99,13 +99,10 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
     const userPrompt = `Analyze this waste item for disposal in ${city}. Return ONLY the JSON object as specified.`;
 
     console.log("=== CALLING OPENAI API ===");
-    console.log("Model: gpt-5-2025-08-07");
-    console.log("System prompt length:", systemPrompt.length);
-    console.log("User prompt:", userPrompt);
-    console.log("Image URL type:", imageUrl.startsWith("data:") ? "base64" : "url");
+    console.log("Model: gpt-5-nano-2025-08-07");
 
     const requestBody = {
-      model: "gpt-5-2025-08-07",
+      model: "gpt-5-nano-2025-08-07",
       messages: [
         {
           role: "system",
@@ -133,7 +130,7 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
 
     console.log("Request body prepared, messages count:", requestBody.messages.length);
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${openAIApiKey}`,
