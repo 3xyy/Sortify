@@ -13,15 +13,22 @@ const navItems = [
 export const BottomNav = () => {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
+  const [hideNav, setHideNav] = useState(false);
 
-  // Hide navbar on install page or when analyzing
-  if (location.pathname === '/install') {
-    return null;
-  }
+  // Watch for data-hide-nav attribute on body
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setHideNav(document.body.hasAttribute('data-hide-nav'));
+    });
+    
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-hide-nav'] });
+    setHideNav(document.body.hasAttribute('data-hide-nav'));
+    
+    return () => observer.disconnect();
+  }, []);
 
-  // Hide navbar when on result page and analyzing
-  const isAnalyzing = document.querySelector('[data-analyzing="true"]');
-  if (location.pathname.startsWith('/result') && isAnalyzing) {
+  // Hide navbar on install page or when data-hide-nav is set
+  if (location.pathname === '/install' || hideNav) {
     return null;
   }
 

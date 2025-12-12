@@ -72,16 +72,48 @@ const ResultPage = () => {
   const [progress, setProgress] = useState(0);
   const { settings } = useSettings();
 
-  const tips = [
-    "Did you know that aluminum can be recycled forever?",
+  const allFacts = [
+    "Aluminum can be recycled forever without losing quality",
     "Recycling one plastic bottle saves enough energy to power a light bulb for 3 hours",
     "Glass can be recycled endlessly without losing quality",
-    "Composting reduces methane emissions from landfills",
+    "Composting reduces methane emissions from landfills by up to 50%",
     "Recycling paper saves 17 trees per ton",
     "Americans throw away 25 trillion Styrofoam cups every year",
     "Recycling steel saves 60% of the energy needed to make new steel",
-    "E-waste contains valuable materials like gold and copper",
+    "E-waste contains valuable materials like gold, silver, and copper",
+    "A single recycled tin can saves enough energy to power a TV for 3 hours",
+    "Plastic takes up to 1,000 years to decompose in landfills",
+    "Recycling one ton of cardboard saves 9 cubic yards of landfill space",
+    "The average person generates 4.5 pounds of trash daily",
+    "Only 9% of all plastic ever produced has been recycled",
+    "Recycling aluminum uses 95% less energy than making new aluminum",
+    "Food waste makes up about 30% of what we throw away",
+    "A glass bottle takes 4,000 years to decompose",
+    "Recycling one aluminum can saves enough energy to run a computer for 3 hours",
+    "The US recycles about 35% of its municipal waste",
+    "Batteries contain toxic chemicals that can contaminate soil and water",
+    "Textiles take 200+ years to decompose in landfills",
+    "Recycling paper produces 70% less air pollution than making new paper",
+    "One ton of recycled plastic saves 7,200 kWh of electricity",
+    "Coffee grounds make excellent compost for gardens",
+    "Electronic waste is the fastest-growing waste stream globally",
+    "Recycling one newspaper saves enough water for a 10-minute shower",
+    "Landfills are the third-largest source of methane in the US",
+    "Composting can reduce your household waste by up to 30%",
+    "Recycled glass reduces related air pollution by 20%",
+    "A plastic bag is used for an average of 12 minutes before being discarded",
+    "Recycling creates 6 times more jobs than landfilling",
   ];
+
+  // Shuffle facts on mount to get random order
+  const [shuffledFacts] = useState(() => {
+    const shuffled = [...allFacts];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  });
   
   useEffect(() => {
     const analyzeImage = async () => {
@@ -257,23 +289,43 @@ const ResultPage = () => {
     analyzeImage();
   }, [state, navigate, settings.selectedCity]);
 
-  // Simulate progress during analysis
+  // Smoother progress animation during analysis
   useEffect(() => {
     if (!isAnalyzing) return;
     
-    const progressSteps = [
-      { value: 20, delay: 300 },
-      { value: 40, delay: 600 },
-      { value: 60, delay: 900 },
-      { value: 75, delay: 1200 },
-      { value: 90, delay: 1800 }
-    ];
+    let startTime = Date.now();
+    let animationFrame: number;
     
-    const timers = progressSteps.map(({ value, delay }) => 
-      setTimeout(() => setProgress(value), delay)
-    );
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      
+      // Easing function for smooth natural progress
+      // Starts slow, speeds up, then slows down before 90%
+      let targetProgress: number;
+      
+      if (elapsed < 500) {
+        // First 500ms: slow start (0-15%)
+        targetProgress = (elapsed / 500) * 15;
+      } else if (elapsed < 2000) {
+        // 500ms-2s: faster middle phase (15-70%)
+        targetProgress = 15 + ((elapsed - 500) / 1500) * 55;
+      } else if (elapsed < 4000) {
+        // 2s-4s: slow down approaching 90% (70-88%)
+        const t = (elapsed - 2000) / 2000;
+        targetProgress = 70 + (1 - Math.pow(1 - t, 3)) * 18;
+      } else {
+        // After 4s: very slowly creep up (88-92%)
+        const t = Math.min((elapsed - 4000) / 10000, 1);
+        targetProgress = 88 + t * 4;
+      }
+      
+      setProgress(Math.min(Math.round(targetProgress), 92));
+      animationFrame = requestAnimationFrame(animate);
+    };
     
-    return () => timers.forEach(clearTimeout);
+    animationFrame = requestAnimationFrame(animate);
+    
+    return () => cancelAnimationFrame(animationFrame);
   }, [isAnalyzing]);
   
   // Complete progress when analysis is done
@@ -285,17 +337,27 @@ const ResultPage = () => {
     }
   }, [isAnalyzing, progress]);
 
-  // Cycle tips during loading
+  // Cycle through shuffled facts during loading
   useEffect(() => {
     if (!isAnalyzing) return;
     
     const interval = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % tips.length);
+      setCurrentTip((prev) => (prev + 1) % shuffledFacts.length);
     }, 3500);
     
     return () => clearInterval(interval);
-  }, [isAnalyzing, tips.length]);
+  }, [isAnalyzing, shuffledFacts.length]);
   
+  // Hide bottom navbar during analysis
+  useEffect(() => {
+    if (isAnalyzing) {
+      document.body.setAttribute('data-hide-nav', 'true');
+    } else {
+      document.body.removeAttribute('data-hide-nav');
+    }
+    return () => document.body.removeAttribute('data-hide-nav');
+  }, [isAnalyzing]);
+
   // Show loading state while analyzing
   if (isAnalyzing) {
     return (
@@ -315,17 +377,17 @@ const ResultPage = () => {
           </div>
 
           <div className="w-full space-y-3">
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2 transition-all duration-300" />
             <p className="text-sm text-muted-foreground">
               {progress}% complete
             </p>
           </div>
 
-          <div className="bg-primary/10 rounded-xl p-6 animate-fade-in">
-            <div className="flex items-start gap-3">
+          <div className="bg-primary/10 rounded-xl p-6 min-h-[100px] flex items-center">
+            <div className="flex items-start gap-3 animate-fade-in" key={currentTip}>
               <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
               <p className="text-sm leading-relaxed text-left">
-                {tips[currentTip]}
+                {shuffledFacts[currentTip]}
               </p>
             </div>
           </div>
