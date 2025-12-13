@@ -18,7 +18,7 @@ const MAX_CITY_LENGTH = 100;
 const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
 
 // Version control - UPDATE THIS when deploying new versions
-const MINIMUM_APP_VERSION = "12.12.25.04.50";
+const MINIMUM_APP_VERSION = "12.13.25.01.08";
 
 function isVersionOutdated(clientVersion: string): boolean {
   if (!clientVersion) return true;
