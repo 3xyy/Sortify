@@ -303,10 +303,37 @@ const SettingsPage = () => {
             )}
           </Card>
 
+          {/* App Updates */}
+          <Card className="p-6 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-4 w-4 text-primary" />
+              <h2 className="font-semibold">App Updates</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              The app checks for updates every 30 seconds and automatically updates when a new version is available.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={async () => {
+                triggerHaptic("light");
+                if ('serviceWorker' in navigator) {
+                  const reg = await navigator.serviceWorker.getRegistration();
+                  if (reg) {
+                    await reg.update();
+                    toast.success("Checked for updates");
+                  }
+                }
+              }}
+            >
+              Check For Updates
+            </Button>
+          </Card>
+
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 12.12.25.10.45
+              <span className="font-medium">App Version:</span> 12.12.25.04.36
             </div>
             <div>
               Made with ❤️ by{" "}

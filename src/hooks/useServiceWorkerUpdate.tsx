@@ -68,5 +68,12 @@ export function useServiceWorkerUpdate() {
     }
   }, [needRefresh, updateServiceWorker]);
 
-  return { needRefresh, updateServiceWorker };
+  const checkForUpdates = useCallback(async () => {
+    if (registration) {
+      await registration.update();
+      toast.success("Checked for updates");
+    }
+  }, [registration]);
+
+  return { needRefresh, updateServiceWorker, checkForUpdates };
 }
