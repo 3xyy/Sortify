@@ -127,7 +127,7 @@ const ResultPage = () => {
           instructions: state.item.details.instructions,
           localRule: state.item.details.localRule,
           co2Saved: state.item.details.co2Saved,
-          imageUrl: state.item.thumbnail,
+          imageUrl: state.item.details.fullImage || state.item.thumbnail,
           materialType: state.item.details.materialType || "Unknown"
         });
         return;
@@ -234,19 +234,47 @@ const ResultPage = () => {
 
         console.log('Analysis result:', data);
 
-        // Convert file to base64 for persistent storage
-        const fileToBase64 = (file: File): Promise<string> => {
+        // Compress image to small thumbnail for localStorage
+        const compressImage = (file: File, maxSize: number = 200): Promise<string> => {
           return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+              // Calculate dimensions maintaining aspect ratio
+              let width = img.width;
+              let height = img.height;
+              
+              if (width > height) {
+                if (width > maxSize) {
+                  height = (height * maxSize) / width;
+                  width = maxSize;
+                }
+              } else {
+                if (height > maxSize) {
+                  width = (width * maxSize) / height;
+                  height = maxSize;
+                }
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              ctx?.drawImage(img, 0, 0, width, height);
+              
+              // Convert to JPEG with quality 0.7 for smaller size
+              resolve(canvas.toDataURL('image/jpeg', 0.7));
+            };
+            
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
           });
         };
         
-        const thumbnailBase64 = await fileToBase64(file);
+        const thumbnailBase64 = await compressImage(file, 200);
+        const fullImageBase64 = await compressImage(file, 800);
         
-        // Save to localStorage with base64 image (persistent)
+        // Save to localStorage with compressed thumbnail
         const scanItem = {
           id: Date.now().toString(),
           itemName: data.itemName,
@@ -259,19 +287,39 @@ const ResultPage = () => {
             contamination: data.contamination,
             instructions: data.instructions,
             localRule: data.localRule,
-            co2Saved: data.co2Saved
+            co2Saved: data.co2Saved,
+            fullImage: fullImageBase64
           }
         };
         
         const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+        
+        // Keep only last 20 items to prevent quota issues
+        if (history.length >= 20) {
+          history.pop();
+        }
+        
         history.unshift(scanItem);
-        localStorage.setItem('scanHistory', JSON.stringify(history));
         
+        try {
+          localStorage.setItem('scanHistory', JSON.stringify(history));
+        } catch (e) {
+          // If still too large, remove oldest items until it fits
+          while (history.length > 1) {
+            history.pop();
+            try {
+              localStorage.setItem('scanHistory', JSON.stringify(history));
+              break;
+            } catch (e) {
+              continue;
+            }
+          }
+        }
         
-        // Set the result with the base64 image
+        // Set the result with the larger image for display
         setResult({
           ...data,
-          imageUrl: thumbnailBase64
+          imageUrl: fullImageBase64
         });
         
         toast.success("Scan saved to history");
