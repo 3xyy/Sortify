@@ -17,6 +17,32 @@ const MAX_IMAGE_SIZE = 50 * 1024 * 1024; // 10MB max
 const MAX_CITY_LENGTH = 100;
 const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
 
+// Version control - UPDATE THIS when deploying new versions
+const MINIMUM_APP_VERSION = "12.12.25.04.50";
+
+function isVersionOutdated(clientVersion: string): boolean {
+  if (!clientVersion) return true;
+  
+  // Parse version: MM.DD.YY.HH.MM
+  const parseVersion = (v: string): number[] => {
+    return v.split('.').map(n => parseInt(n, 10));
+  };
+  
+  try {
+    const client = parseVersion(clientVersion);
+    const minimum = parseVersion(MINIMUM_APP_VERSION);
+    
+    // Compare each segment: [MM, DD, YY, HH, MM]
+    for (let i = 0; i < minimum.length; i++) {
+      if ((client[i] || 0) < minimum[i]) return true;
+      if ((client[i] || 0) > minimum[i]) return false;
+    }
+    return false; // Versions are equal
+  } catch {
+    return true; // Invalid version format
+  }
+}
+
 function getClientIP(req: Request): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
          req.headers.get("x-real-ip") || 
@@ -125,7 +151,22 @@ serve(async (req) => {
       );
     }
 
-    const { imageData, city } = body;
+    const { imageData, city, appVersion } = body;
+    
+    // Version check - reject outdated apps
+    if (isVersionOutdated(appVersion)) {
+      console.log(`Outdated app version: ${appVersion}, minimum required: ${MINIMUM_APP_VERSION}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "App update required",
+          updateRequired: true,
+          message: "Please update your app to continue. Go to Settings and tap 'Check For Updates', or reinstall the app from your home screen.",
+          currentVersion: appVersion || "unknown",
+          requiredVersion: MINIMUM_APP_VERSION
+        }),
+        { status: 426, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     
     // Validate image data
     const imageValidation = validateImageData(imageData);

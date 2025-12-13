@@ -185,14 +185,27 @@ const ResultPage = () => {
         });
         console.log('City selected:', city);
         console.log('Image data size:', imageData.length, 'characters');
+        // App version for validation
+        const appVersion = "12.12.25.04.50";
         
         // Call the edge function
         const { data, error } = await supabase.functions.invoke('analyze-waste', {
           body: { 
             imageData,
-            city
+            city,
+            appVersion
           }
         });
+        
+        // Check if update is required
+        if (data?.updateRequired) {
+          toast.error("App update required! Please update to continue.", {
+            duration: 10000,
+            description: data.message
+          });
+          navigate("/settings");
+          return;
+        }
 
         console.log('=== ANALYZE WASTE RESPONSE RECEIVED ===');
         console.log('Response timestamp:', new Date().toISOString());
