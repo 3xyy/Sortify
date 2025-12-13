@@ -13,7 +13,7 @@ const RATE_LIMIT_MAX = 10; // Max requests per window
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute window
 
 // Input validation constants
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB max
+const MAX_IMAGE_SIZE = 50 * 1024 * 1024; // 10MB max
 const MAX_CITY_LENGTH = 100;
 const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
 
