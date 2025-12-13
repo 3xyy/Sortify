@@ -27,11 +27,6 @@ export const BottomNav = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Hide navbar on install page or when data-hide-nav is set
-  if (location.pathname === '/install' || hideNav) {
-    return null;
-  }
-
   // Reset navbar visibility on route change
   useEffect(() => {
     setIsVisible(true);
@@ -86,7 +81,10 @@ export const BottomNav = () => {
     };
   }, []);
 
-  if (!isVisible) return null;
+  // All hooks are now called before any early returns
+  if (location.pathname === '/install' || hideNav || !isVisible) {
+    return null;
+  }
 
   return (
     <nav 
