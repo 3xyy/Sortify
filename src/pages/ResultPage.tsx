@@ -186,81 +186,58 @@ const ResultPage = () => {
         console.log('City selected:', city);
         console.log('Image data size:', imageData.length, 'characters');
         // App version for validation
-        const appVersion = "12.13.25.01.08";
+        const appVersion = "12.13.25.02.04";
         
-        // Call the edge function
-        const { data, error } = await supabase.functions.invoke('analyze-waste', {
-          body: { 
+        // Call the edge function using raw fetch to properly handle error responses
+        const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`;
+        const response = await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+          },
+          body: JSON.stringify({ 
             imageData,
             city,
             appVersion
-          }
+          })
         });
         
-        // Check if update is required
-        if (data?.updateRequired) {
-          toast.error("App update required! Please update to continue.", {
-            duration: 10000,
-            description: data.message
+        const data = await response.json();
+        
+        console.log('=== ANALYZE WASTE RESPONSE RECEIVED ===');
+        console.log('Response timestamp:', new Date().toISOString());
+        console.log('Response status:', response.status);
+        console.log('Data:', data);
+        console.log('=== ANALYZE WASTE REQUEST COMPLETED ===');
+        
+        // Check if update is required (426 status or updateRequired flag)
+        if (response.status === 426 || data?.updateRequired) {
+          const currentVersion = data?.currentVersion || appVersion;
+          const requiredVersion = data?.requiredVersion || "latest";
+          
+          setResult({
+            error: true,
+            errorTitle: "App Update Required",
+            errorMessage: "Your app is outdated and needs to be updated to continue scanning.",
+            errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${currentVersion}\nRequired version: ${requiredVersion}`,
+            imageUrl: URL.createObjectURL(file),
+            timestamp: new Date().toISOString(),
+            isUpdateRequired: true,
           });
-          navigate("/settings");
           return;
         }
 
-        console.log('=== ANALYZE WASTE RESPONSE RECEIVED ===');
-        console.log('Response timestamp:', new Date().toISOString());
-        console.log('Error:', error);
-        console.log('Error type:', error ? typeof error : 'null');
-        console.log('Error details:', error ? JSON.stringify(error, null, 2) : 'none');
-        console.log('Data:', data);
-        console.log('Data type:', data ? typeof data : 'null');
-        console.log('Full data object:', data ? JSON.stringify(data, null, 2) : 'null');
-        console.log('=== ANALYZE WASTE REQUEST COMPLETED ===');
-
-        if (error) {
-          console.error('Edge function error:', error);
-          
-          // Check if this is an app update required error
-          // The error message from Supabase includes the response body for non-2xx responses
-          const errorString = error.message || error.toString() || '';
-          const isUpdateRequired = data?.updateRequired || 
-            errorString.includes('updateRequired') || 
-            errorString.includes('426') ||
-            errorString.includes('App update required');
-          
-          if (isUpdateRequired) {
-            // Try to extract version info from error message or data
-            let currentVersion = data?.currentVersion || "unknown";
-            let requiredVersion = data?.requiredVersion || "latest";
-            
-            // Try to parse from error message if not in data
-            try {
-              const match = errorString.match(/"currentVersion"\s*:\s*"([^"]+)"/);
-              const reqMatch = errorString.match(/"requiredVersion"\s*:\s*"([^"]+)"/);
-              if (match) currentVersion = match[1];
-              if (reqMatch) requiredVersion = reqMatch[1];
-            } catch (e) {
-              // Ignore parsing errors
-            }
-            
-            setResult({
-              error: true,
-              errorTitle: "App Update Required",
-              errorMessage: "Your app is outdated and needs to be updated to continue scanning.",
-              errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${currentVersion}\nRequired version: ${requiredVersion}`,
-              imageUrl: URL.createObjectURL(file),
-              timestamp: new Date().toISOString(),
-              isUpdateRequired: true,
-            });
-            return;
-          }
+        if (!response.ok) {
+          console.error('Edge function error:', data);
           
           // Show detailed error page instead of mock data
           setResult({
             error: true,
             errorTitle: "Analysis Failed",
-            errorMessage: data?.error || error.message,
-            errorDetails: data?.details || error.toString(),
+            errorMessage: data?.error || data?.message || "An error occurred during analysis",
+            errorDetails: data?.details || JSON.stringify(data, null, 2),
             imageUrl: URL.createObjectURL(file),
             timestamp: new Date().toISOString(),
           });
