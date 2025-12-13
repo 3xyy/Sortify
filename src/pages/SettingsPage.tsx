@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { APP_VERSION } from "@/constants/version";
 
 const SettingsPage = () => {
   const { settings, updateSetting, triggerHaptic } = useSettings();
@@ -29,7 +30,7 @@ const SettingsPage = () => {
       // Make a minimal test request to validate the OpenAI API key works
       const testImageData =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
-      const appVersion = "12.13.25.02.04";
+      const appVersion = APP_VERSION;
       const response = await supabase.functions.invoke("analyze-waste", {
         body: {
           imageData: testImageData,
@@ -335,7 +336,7 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 12.13.25.02.04
+              <span className="font-medium">App Version:</span> {APP_VERSION}
             </div>
             <div>
               Made with ❤️ by{" "}

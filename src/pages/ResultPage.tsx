@@ -9,6 +9,7 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { supabase } from "@/integrations/supabase/client";
 import { useSettings } from "@/hooks/useSettings";
 import { toast } from "sonner";
+import { APP_VERSION } from "@/constants/version";
 
 const categoryConfig = {
   recycle: {
@@ -186,7 +187,7 @@ const ResultPage = () => {
         console.log('City selected:', city);
         console.log('Image data size:', imageData.length, 'characters');
         // App version for validation
-        const appVersion = "12.13.25.02.04";
+        const appVersion = APP_VERSION;
         
         // Call the edge function using raw fetch to properly handle error responses
         const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-waste`;

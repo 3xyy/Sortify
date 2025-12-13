@@ -12,10 +12,11 @@ import { BottomNav } from "./components/BottomNav";
 import { DemoProvider } from "./contexts/DemoContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
+import { APP_VERSION } from "./constants/version";
 
 const queryClient = new QueryClient();
 
-// App version: 12.13.25.02.04
+// App version - see src/constants/version.ts for centralized version
 const AppContent = () => {
   useServiceWorkerUpdate();
   return null;
