@@ -29,10 +29,12 @@ const SettingsPage = () => {
       // Make a minimal test request to validate the OpenAI API key works
       const testImageData =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
+      const appVersion = "12.12.25.04.50";
       const response = await supabase.functions.invoke("analyze-waste", {
         body: {
           imageData: testImageData,
           city: "Test",
+          appVersion,
         },
       });
 
