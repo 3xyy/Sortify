@@ -11,8 +11,15 @@ import NotFound from "./pages/NotFound";
 import { BottomNav } from "./components/BottomNav";
 import { DemoProvider } from "./contexts/DemoContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 
 const queryClient = new QueryClient();
+
+// App version: 12.13.24.16.42
+const AppContent = () => {
+  useServiceWorkerUpdate();
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -20,6 +27,7 @@ const App = () => (
       <DemoProvider>
         <TooltipProvider>
           <BrowserRouter>
+            <AppContent />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/history" element={<HistoryPage />} />
