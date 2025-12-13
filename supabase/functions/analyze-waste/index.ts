@@ -17,10 +17,14 @@ const MAX_IMAGE_SIZE = 50 * 1024 * 1024; // 10MB max
 const MAX_CITY_LENGTH = 100;
 const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
 
-// Required app version is read from secrets - update via Lovable secrets management
-const REQUIRED_APP_VERSION = Deno.env.get("REQUIRED_APP_VERSION") || "12.13.25.12.05";
+// Required app version - MUST be set via Lovable Cloud secrets
+const REQUIRED_APP_VERSION = Deno.env.get("REQUIRED_APP_VERSION");
 
 function isVersionOutdated(clientVersion: string): boolean {
+  if (!REQUIRED_APP_VERSION) {
+    console.error("CRITICAL: REQUIRED_APP_VERSION secret not set!");
+    return false; // Allow requests if secret not configured (fail open for now)
+  }
   // Version must match exactly - no older versions allowed
   return clientVersion !== REQUIRED_APP_VERSION;
 }
