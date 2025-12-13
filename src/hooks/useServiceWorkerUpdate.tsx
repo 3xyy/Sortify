@@ -4,15 +4,15 @@ import { toast } from 'sonner';
 
 export function useServiceWorkerUpdate() {
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, registration) {
-      // Check for updates every 60 seconds
+      // Check for updates every 30 seconds
       if (registration) {
         setInterval(() => {
           registration.update();
-        }, 60 * 1000);
+        }, 30 * 1000);
       }
     },
     onRegisterError(error) {
@@ -22,22 +22,15 @@ export function useServiceWorkerUpdate() {
 
   useEffect(() => {
     if (needRefresh) {
-      toast('New version available!', {
-        description: 'Click to update to the latest version.',
-        duration: Infinity,
-        action: {
-          label: 'Update',
-          onClick: () => {
-            updateServiceWorker(true);
-          },
-        },
-        onDismiss: () => {
-          // Auto-update even if dismissed after 5 seconds
-          setTimeout(() => {
-            updateServiceWorker(true);
-          }, 5000);
-        },
+      // Show brief notification then force update
+      toast.loading('Updating to latest version...', {
+        duration: 2000,
       });
+      
+      // Force update after short delay
+      setTimeout(() => {
+        updateServiceWorker(true);
+      }, 1500);
     }
   }, [needRefresh, updateServiceWorker]);
 

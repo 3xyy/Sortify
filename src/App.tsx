@@ -15,7 +15,7 @@ import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 
 const queryClient = new QueryClient();
 
-// App version: 12.13.24.16.42
+// App version: 12.12.25.04.30
 const AppContent = () => {
   useServiceWorkerUpdate();
   return null;
