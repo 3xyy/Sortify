@@ -7,37 +7,164 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
 };
 
+// Simple in-memory rate limiting (resets on function cold start)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_MAX = 10; // Max requests per window
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute window
+
+// Input validation constants
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB max
+const MAX_CITY_LENGTH = 100;
+const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
+
+function getClientIP(req: Request): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+         req.headers.get("x-real-ip") || 
+         "unknown";
+}
+
+function checkRateLimit(clientIP: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(clientIP);
+  
+  if (!entry || now > entry.resetTime) {
+    // New window
+    rateLimitMap.set(clientIP, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetIn: RATE_LIMIT_WINDOW };
+  }
+  
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0, resetIn: entry.resetTime - now };
+  }
+  
+  entry.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count, resetIn: entry.resetTime - now };
+}
+
+function validateImageData(imageData: unknown): { valid: boolean; error?: string } {
+  if (!imageData || typeof imageData !== "string") {
+    return { valid: false, error: "No image data provided" };
+  }
+  
+  // Check size (base64 is ~33% larger than binary, so 10MB binary ≈ 13.3MB base64)
+  if (imageData.length > MAX_IMAGE_SIZE * 1.4) {
+    return { valid: false, error: "Image too large. Maximum size is 10MB" };
+  }
+  
+  // Validate format: must be base64 data URI or valid URL
+  const isDataUri = imageData.startsWith("data:image/");
+  const isUrl = imageData.startsWith("http://") || imageData.startsWith("https://");
+  const isRawBase64 = /^[A-Za-z0-9+/=]+$/.test(imageData.substring(0, 100));
+  
+  if (!isDataUri && !isUrl && !isRawBase64) {
+    return { valid: false, error: "Invalid image format. Provide base64 or URL" };
+  }
+  
+  return { valid: true };
+}
+
+function validateCity(city: unknown): { valid: boolean; sanitized: string; error?: string } {
+  if (!city || typeof city !== "string") {
+    return { valid: true, sanitized: "Unknown Location", error: undefined };
+  }
+  
+  const trimmed = city.trim();
+  
+  if (trimmed.length > MAX_CITY_LENGTH) {
+    return { valid: false, sanitized: "", error: "City name too long" };
+  }
+  
+  if (!VALID_CITY_PATTERN.test(trimmed)) {
+    return { valid: false, sanitized: "", error: "Invalid characters in city name" };
+  }
+  
+  // Sanitize: escape any potential injection characters
+  const sanitized = trimmed.replace(/[<>"'&]/g, "");
+  
+  return { valid: true, sanitized };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const { imageData, city } = await req.json();
-    console.log("=== ANALYZE WASTE FUNCTION STARTED ===");
-    console.log("City:", city);
-    console.log("Image data length:", imageData?.length);
-    console.log("Image data type:", typeof imageData);
-    console.log("Image data preview:", imageData?.substring(0, 50));
+  const clientIP = getClientIP(req);
+  
+  // Rate limiting check
+  const rateLimit = checkRateLimit(clientIP);
+  if (!rateLimit.allowed) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please try again later." }),
+      {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString(),
+          "X-RateLimit-Remaining": "0",
+        },
+      },
+    );
+  }
 
-    if (!imageData) {
-      console.error("ERROR: No image data provided");
-      throw new Error("No image data provided");
+  try {
+    // Parse request body with size limit
+    let body;
+    try {
+      const text = await req.text();
+      if (text.length > MAX_IMAGE_SIZE * 1.5) {
+        throw new Error("Request body too large");
+      }
+      body = JSON.parse(text);
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-    console.log("API Key present:", !!openAIApiKey);
-    console.log("API Key length:", openAIApiKey?.length);
+    const { imageData, city } = body;
+    
+    // Validate image data
+    const imageValidation = validateImageData(imageData);
+    if (!imageValidation.valid) {
+      return new Response(
+        JSON.stringify({ error: imageValidation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    
+    // Validate and sanitize city
+    const cityValidation = validateCity(city);
+    if (!cityValidation.valid) {
+      return new Response(
+        JSON.stringify({ error: cityValidation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const sanitizedCity = cityValidation.sanitized;
 
+    console.log("=== ANALYZE WASTE FUNCTION STARTED ===");
+    console.log("City:", sanitizedCity);
+    console.log("Image data length:", imageData?.length);
+    console.log("Client IP:", clientIP);
+    console.log("Rate limit remaining:", rateLimit.remaining);
+
+    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
+    
     if (!openAIApiKey) {
       console.error("ERROR: OPENAI_API_KEY not configured");
-      throw new Error("OPENAI_API_KEY not configured");
+      return new Response(
+        JSON.stringify({ error: "Service temporarily unavailable" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Prepare the image URL (handle both base64 and URLs)
     let imageUrl = imageData;
     if (!imageData.startsWith("http")) {
-      // It's base64, ensure it has the proper data URI prefix
       if (!imageData.startsWith("data:")) {
         imageUrl = `data:image/jpeg;base64,${imageData}`;
       }
@@ -96,10 +223,9 @@ REQUIREMENTS:
 
 Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWAYS respond in the exact JSON format above.`;
 
-    const userPrompt = `Analyze this waste item for disposal in ${city}. Return ONLY the JSON object as specified.`;
+    const userPrompt = `Analyze this waste item for disposal in ${sanitizedCity}. Return ONLY the JSON object as specified.`;
 
     console.log("=== CALLING OPENAI API ===");
-    console.log("Model: gpt-5-nano-2025-08-07");
 
     const requestBody = {
       model: "gpt-5-nano-2025-08-07",
@@ -128,8 +254,6 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
       response_format: { type: "json_object" },
     };
 
-    console.log("Request body prepared, messages count:", requestBody.messages.length);
-
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -139,77 +263,60 @@ Your goal is to be accurate, safe, city-aware, environmentally helpful, and ALWA
       body: JSON.stringify(requestBody),
     });
 
-    console.log("=== OPENAI RESPONSE ===");
-    console.log("Status:", response.status);
-    console.log("Status text:", response.statusText);
-    console.log("Headers:", Object.fromEntries(response.headers.entries()));
+    console.log("OpenAI response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("=== OPENAI API ERROR ===");
-      console.error("Status:", response.status);
-      console.error("Error text:", errorText);
-
-      // Try to parse error as JSON for more details
-      try {
-        const errorJson = JSON.parse(errorText);
-        console.error("Error details:", JSON.stringify(errorJson, null, 2));
-      } catch (e) {
-        console.error("Could not parse error as JSON");
-      }
-
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      console.error("OpenAI API error:", response.status, errorText);
+      
+      // Return generic error to client
+      return new Response(
+        JSON.stringify({ error: "Failed to analyze image. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const data = await response.json();
-    console.log("=== OPENAI RESPONSE DATA ===");
-    console.log("Full response:", JSON.stringify(data, null, 2));
-    console.log("Choices count:", data.choices?.length);
-
     const aiResponse = data.choices?.[0]?.message?.content;
-    console.log("=== AI RESPONSE CONTENT ===");
-    console.log("Content type:", typeof aiResponse);
-    console.log("Content length:", aiResponse?.length);
-    console.log("Content preview:", aiResponse?.substring(0, 200));
-    console.log("Full content:", aiResponse);
 
     if (!aiResponse) {
-      console.error("=== EMPTY AI RESPONSE ===");
-      console.error("Full data object:", JSON.stringify(data, null, 2));
-      throw new Error("Empty response from AI. Please check your API key and try again.");
+      console.error("Empty AI response:", JSON.stringify(data, null, 2));
+      return new Response(
+        JSON.stringify({ error: "Failed to analyze image. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Parse the JSON response
     let analysisResult;
     try {
-      console.log("=== PARSING JSON ===");
       analysisResult = JSON.parse(aiResponse);
-      console.log("Parsed successfully:", JSON.stringify(analysisResult, null, 2));
+      console.log("Analysis successful for:", analysisResult.itemName);
     } catch (e) {
-      console.error("=== JSON PARSE ERROR ===");
-      console.error("Error:", e);
-      console.error("Raw response to parse:", aiResponse);
-      const errorMsg = e instanceof Error ? e.message : String(e);
-      throw new Error(`Invalid JSON response from AI: ${errorMsg}`);
+      console.error("JSON parse error:", e, "Raw:", aiResponse);
+      return new Response(
+        JSON.stringify({ error: "Failed to process analysis. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     console.log("=== SUCCESS ===");
-    console.log("Returning result:", JSON.stringify(analysisResult, null, 2));
 
     return new Response(JSON.stringify(analysisResult), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json",
+        "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+      },
     });
   } catch (error) {
-    console.error("=== FUNCTION ERROR ===");
-    console.error("Error type:", error instanceof Error ? "Error" : typeof error);
-    console.error("Error message:", error instanceof Error ? error.message : String(error));
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+    // Log detailed error server-side only
+    console.error("Function error:", error instanceof Error ? error.message : String(error));
+    console.error("Stack:", error instanceof Error ? error.stack : "No stack");
 
+    // Return generic error to client (no stack traces!)
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error occurred",
-        details: error instanceof Error ? error.stack : String(error),
-      }),
+      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
