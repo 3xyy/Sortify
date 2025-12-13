@@ -186,7 +186,7 @@ const ResultPage = () => {
         console.log('City selected:', city);
         console.log('Image data size:', imageData.length, 'characters');
         // App version for validation
-        const appVersion = "12.12.25.04.50";
+        const appVersion = "12.13.25.01.08";
         
         // Call the edge function
         const { data, error } = await supabase.functions.invoke('analyze-waste', {
@@ -219,6 +219,20 @@ const ResultPage = () => {
 
         if (error) {
           console.error('Edge function error:', error);
+          
+          // Check if this is an app update required error
+          if (data?.updateRequired) {
+            setResult({
+              error: true,
+              errorTitle: "App Update Required",
+              errorMessage: "Your app is outdated and needs to be updated to continue scanning.",
+              errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${data.currentVersion || "unknown"}\nRequired version: ${data.requiredVersion || "latest"}`,
+              imageUrl: URL.createObjectURL(file),
+              timestamp: new Date().toISOString(),
+              isUpdateRequired: true,
+            });
+            return;
+          }
           
           // Show detailed error page instead of mock data
           setResult({

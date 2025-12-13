@@ -29,7 +29,7 @@ const SettingsPage = () => {
       // Make a minimal test request to validate the OpenAI API key works
       const testImageData =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
-      const appVersion = "12.12.25.04.50";
+      const appVersion = "12.13.25.01.08";
       const response = await supabase.functions.invoke("analyze-waste", {
         body: {
           imageData: testImageData,
@@ -335,7 +335,7 @@ const SettingsPage = () => {
           {/* Version and Attribution */}
           <div className="mt-8 space-y-3 text-center text-sm text-muted-foreground pb-4">
             <div>
-              <span className="font-medium">App Version:</span> 12.12.25.04.50
+              <span className="font-medium">App Version:</span> 12.13.25.01.08
             </div>
             <div>
               Made with ❤️ by{" "}
