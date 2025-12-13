@@ -221,12 +221,33 @@ const ResultPage = () => {
           console.error('Edge function error:', error);
           
           // Check if this is an app update required error
-          if (data?.updateRequired) {
+          // The error message from Supabase includes the response body for non-2xx responses
+          const errorString = error.message || error.toString() || '';
+          const isUpdateRequired = data?.updateRequired || 
+            errorString.includes('updateRequired') || 
+            errorString.includes('426') ||
+            errorString.includes('App update required');
+          
+          if (isUpdateRequired) {
+            // Try to extract version info from error message or data
+            let currentVersion = data?.currentVersion || "unknown";
+            let requiredVersion = data?.requiredVersion || "latest";
+            
+            // Try to parse from error message if not in data
+            try {
+              const match = errorString.match(/"currentVersion"\s*:\s*"([^"]+)"/);
+              const reqMatch = errorString.match(/"requiredVersion"\s*:\s*"([^"]+)"/);
+              if (match) currentVersion = match[1];
+              if (reqMatch) requiredVersion = reqMatch[1];
+            } catch (e) {
+              // Ignore parsing errors
+            }
+            
             setResult({
               error: true,
               errorTitle: "App Update Required",
               errorMessage: "Your app is outdated and needs to be updated to continue scanning.",
-              errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${data.currentVersion || "unknown"}\nRequired version: ${data.requiredVersion || "latest"}`,
+              errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${currentVersion}\nRequired version: ${requiredVersion}`,
               imageUrl: URL.createObjectURL(file),
               timestamp: new Date().toISOString(),
               isUpdateRequired: true,
