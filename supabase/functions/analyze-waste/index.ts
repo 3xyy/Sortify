@@ -17,30 +17,13 @@ const MAX_IMAGE_SIZE = 50 * 1024 * 1024; // 10MB max
 const MAX_CITY_LENGTH = 100;
 const VALID_CITY_PATTERN = /^[a-zA-Z\s\-',.]+$/;
 
-// Version control - UPDATE THIS when deploying new versions
-const MINIMUM_APP_VERSION = "12.13.25.11.45";
+// REQUIRED APP VERSION - Must match src/constants/version.ts exactly!
+// This is the ONLY acceptable version. Older versions are rejected.
+const REQUIRED_APP_VERSION = "12.13.25.12.05";
 
 function isVersionOutdated(clientVersion: string): boolean {
-  if (!clientVersion) return true;
-  
-  // Parse version: MM.DD.YY.HH.MM
-  const parseVersion = (v: string): number[] => {
-    return v.split('.').map(n => parseInt(n, 10));
-  };
-  
-  try {
-    const client = parseVersion(clientVersion);
-    const minimum = parseVersion(MINIMUM_APP_VERSION);
-    
-    // Compare each segment: [MM, DD, YY, HH, MM]
-    for (let i = 0; i < minimum.length; i++) {
-      if ((client[i] || 0) < minimum[i]) return true;
-      if ((client[i] || 0) > minimum[i]) return false;
-    }
-    return false; // Versions are equal
-  } catch {
-    return true; // Invalid version format
-  }
+  // Version must match exactly - no older versions allowed
+  return clientVersion !== REQUIRED_APP_VERSION;
 }
 
 function getClientIP(req: Request): string {
@@ -153,16 +136,16 @@ serve(async (req) => {
 
     const { imageData, city, appVersion } = body;
     
-    // Version check - reject outdated apps
+    // Version check - reject any version that doesn't match the required version
     if (isVersionOutdated(appVersion)) {
-      console.log(`Outdated app version: ${appVersion}, minimum required: ${MINIMUM_APP_VERSION}`);
+      console.log(`Outdated app version: ${appVersion}, required: ${REQUIRED_APP_VERSION}`);
       return new Response(
         JSON.stringify({ 
           error: "App update required",
           updateRequired: true,
           message: "Please update your app to continue. Go to Settings and tap 'Check For Updates', or reinstall the app from your home screen.",
           currentVersion: appVersion || "unknown",
-          requiredVersion: MINIMUM_APP_VERSION
+          requiredVersion: REQUIRED_APP_VERSION
         }),
         { status: 426, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
