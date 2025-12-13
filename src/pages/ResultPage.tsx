@@ -234,17 +234,26 @@ const ResultPage = () => {
 
         console.log('Analysis result:', data);
 
-        // Create object URL for the image
-        const imageUrl = URL.createObjectURL(file);
+        // Convert file to base64 for persistent storage
+        const fileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        };
         
-        // Save to localStorage
+        const thumbnailBase64 = await fileToBase64(file);
+        
+        // Save to localStorage with base64 image (persistent)
         const scanItem = {
           id: Date.now().toString(),
           itemName: data.itemName,
           category: data.category,
           date: new Date().toISOString(),
           confidence: data.confidence,
-          thumbnail: imageUrl,
+          thumbnail: thumbnailBase64,
           materialType: data.materialType,
           details: {
             contamination: data.contamination,
@@ -258,10 +267,11 @@ const ResultPage = () => {
         history.unshift(scanItem);
         localStorage.setItem('scanHistory', JSON.stringify(history));
         
-        // Set the result with the image URL
+        
+        // Set the result with the base64 image
         setResult({
           ...data,
-          imageUrl
+          imageUrl: thumbnailBase64
         });
         
         toast.success("Scan saved to history");

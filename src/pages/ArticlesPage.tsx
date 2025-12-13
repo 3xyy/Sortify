@@ -335,7 +335,7 @@ const ArticlesPage = () => {
       recycle: "recycling",
       compost: "composting",
       hazardous: "hazardous",
-      trash: "general",
+      trash: "garbage",
       garbage: "garbage",
     };
     
