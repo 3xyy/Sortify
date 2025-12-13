@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSettings } from "@/hooks/useSettings";
 import { toast } from "sonner";
 import { APP_VERSION } from "@/constants/version";
+import { UpdateRequiredModal } from "@/components/UpdateRequiredModal";
 
 const categoryConfig = {
   recycle: {
@@ -71,6 +72,7 @@ const ResultPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentTip, setCurrentTip] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [updateRequired, setUpdateRequired] = useState<{ current: string; required: string } | null>(null);
   const { settings } = useSettings();
 
   const allFacts = [
@@ -218,15 +220,12 @@ const ResultPage = () => {
           const currentVersion = data?.currentVersion || appVersion;
           const requiredVersion = data?.requiredVersion || "latest";
           
-          setResult({
-            error: true,
-            errorTitle: "App Update Required",
-            errorMessage: "Your app is outdated and needs to be updated to continue scanning.",
-            errorDetails: `How to update:\n\n1. Go to Settings and tap "Check For Updates"\n2. If that doesn't work, delete the app from your home screen\n3. Reinstall by visiting the app URL in your browser\n4. Tap "Add to Home Screen" again\n\nCurrent version: ${currentVersion}\nRequired version: ${requiredVersion}`,
-            imageUrl: URL.createObjectURL(file),
-            timestamp: new Date().toISOString(),
-            isUpdateRequired: true,
+          // Set update required state to show the blocking modal
+          setUpdateRequired({
+            current: currentVersion,
+            required: requiredVersion
           });
+          setIsAnalyzing(false);
           return;
         }
 
@@ -441,6 +440,16 @@ const ResultPage = () => {
     }
     return () => document.body.removeAttribute('data-hide-nav');
   }, [isAnalyzing]);
+
+  // Show update required modal - blocks everything
+  if (updateRequired) {
+    return (
+      <UpdateRequiredModal 
+        currentVersion={updateRequired.current} 
+        requiredVersion={updateRequired.required} 
+      />
+    );
+  }
 
   // Show loading state while analyzing
   if (isAnalyzing) {
